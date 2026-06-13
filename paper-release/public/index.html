@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cetara - Water Technology Revolution</title>
+    <link rel="icon" type="image/x-icon" href="images/cetara.ico">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+
+<style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-blue: #0066ff;
+            --secondary-blue: #0052cc;
+            --accent-cyan: #00d4ff;
+            --dark-bg: #0a0e1a;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --text-primary: #ffffff;
+            --text-secondary: #b0c4de;
+            --gradient-primary: linear-gradient(135deg, #0066ff 0%, #00d4ff 100%);
+            --gradient-hero: linear-gradient(135deg, #0a0e1a 0%, #1a237e 50%, #0066ff 100%);
+            --bg-beige: #f8f6f3;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--dark-bg);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* Hero Visual */
+        .hero-visual {
+            position: relative;
+            height: 600px;
+        }
+
+        .data-card {
+            position: absolute;
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 1.5rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            animation: cardFloat 6s ease-in-out infinite;
+        }
+
+        .data-card:nth-child(1) {
+            top: 50px;
+            left: 50px;
+            animation-delay: 0s;
+        }
+
+        .data-card:nth-child(2) {
+            top: 200px;
+            right: 80px;
+            animation-delay: 2s;
+        }
+
+        .data-card:nth-child(3) {
+            bottom: 100px;
+            left: 100px;
+            animation-delay: 4s;
+        }
+
+        @keyframes cardFloat {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(2deg); }
+        }
+
+        .metric {
+            font-size: 2rem;
+            font-weight: 700;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .metric-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-top: 0.5rem;
+        }
+
+        /* CETARA Acronym Section */
+        .cetara-section {
+            padding: 8rem 2rem;
+            background: rgba(255, 255, 255, 0.02);
+            color: var(--text-primary);
+        }
+
+        .cetara-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 300px 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .cetara-logo {
+            text-align: center;
+        }
+
+        .cetara-logo img {
+            max-height: 300px;
+            width: auto;
+        }
+
+        .cetara-acronym {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.25rem;
+            line-height: 2;
+        }
+
+        .cetara-acronym div {
+            margin-bottom: 0.5rem;
+        }
+
+        .cetara-letter {
+            color: #0066ff;
+            font-weight: bold;
+            font-size: 1.4rem;
+        }
+
+        .cetara-description {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.2rem;
+            line-height: 1.8;
+            color: var(--text-secondary);
+        }
+
+        /* How It Works Section */
+        .how-it-works {
+            padding: 8rem 2rem;
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .how-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .section-header h2 {
+            font-family: 'Poppins', sans-serif;
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .section-header p {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .steps-container {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .step {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1.5rem;
+            background: var(--card-bg);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .step:hover {
+            transform: translateX(10px);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .step-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--gradient-primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .step-content h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .step-content p {
+            color: var(--text-secondary);
+            margin: 0;
+        }
+
+        .how-visual {
+            position: relative;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .how-visual img {
+            width: 100%;
+            height: auto;
+            border-radius: 20px;
+        }
+
+        /* Data Visualization Section */
+        .data-viz-section {
+            padding: 8rem 2rem;
+            background: rgba(255, 255, 255, 0.02);
+            color: var(--text-primary);
+        }
+
+        .viz-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .viz-visual {
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .viz-visual img {
+            width: 100%;
+            height: auto;
+            border-radius: 20px;
+        }
+
+        .viz-content h2 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+        }
+
+        .viz-content p {
+            font-size: 1.2rem;
+            line-height: 1.8;
+            margin-bottom: 2rem;
+            color: var(--text-secondary);
+        }
+
+        /* Partnership Section */
+        .partnership-section {
+            padding: 8rem 2rem;
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .partnership-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .partnership-content h2 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+        }
+
+        .partnership-content p {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            line-height: 1.8;
+            margin-bottom: 2rem;
+        }
+
+        .partnership-visual {
+            text-align: center;
+        }
+
+        .partnership-visual img {
+            max-height: 400px;
+            width: auto;
+        }
+
+        /* CTA Section */
+        .cta-section {
+            padding: 6rem 2rem;
+            text-align: center;
+            background: var(--card-bg);
+            margin: 4rem 2rem;
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .cta-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .cta-section h2 {
+            font-family: 'Poppins', sans-serif;
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .cta-section p {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero-content {
+                grid-template-columns: 1fr;
+                text-align: center;
+                gap: 2rem;
+            }
+
+            .hero-visual {
+                height: 400px;
+                position: relative;
+            }
+
+            .data-card:nth-child(1) {
+                top: 20px;
+                left: 20px;
+                right: auto;
+                bottom: auto;
+            }
+
+            .data-card:nth-child(2) {
+                top: 120px;
+                right: 20px;
+                left: auto;
+                bottom: auto;
+            }
+
+            .data-card:nth-child(3) {
+                top: 220px;
+                left: 20px;
+                right: auto;
+                bottom: auto;
+            }
+
+            .cetara-container {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+                text-align: center;
+            }
+
+            .how-container {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+
+            .viz-container {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+
+            .partnership-container {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+
+            .cta-section {
+                margin: 2rem 1rem;
+                padding: 4rem 1rem;
+            }
+        }
+
+        /* Loading Animation */
+        .loading {
+            opacity: 0;
+            animation: fadeInUp 1s ease-out forwards;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div w3-include-html="parts/background.html"></div>
+
+    <div w3-include-html="parts/navbar.html"></div>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content loading">
+            <div class="hero-text">
+                <h1>Clean Water. Transparent Data.</h1>
+                <p class="subtitle">
+                    Explore the latest in PFAS removal research through our interactive data platform.
+                </p>
+            </div>
+            <div class="hero-visual">
+                <div class="data-card">
+                    <div class="metric">70+</div>
+                    <div class="metric-label">Membrane Types</div>
+                </div>
+                <div class="data-card">
+                    <div class="metric">~1,000</div>
+                    <div class="metric-label">Data Points</div>
+                </div>
+                <div class="data-card">
+                    <div class="metric">21</div>
+                    <div class="metric-label">Types of PFAS</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CETARA Acronym Section -->
+    <section id="about" class="cetara-section">
+        <div class="cetara-container loading">
+            <div class="cetara-logo">
+                <img src="images/cetara.ico" alt="Cetara Logo" />
+            </div>
+            <div class="cetara-acronym">
+                <div><span class="cetara-letter">C</span>entralized</div>
+                <div><span class="cetara-letter">E</span>nvironmental</div>
+                <div><span class="cetara-letter">T</span>echnology for</div>
+                <div><span class="cetara-letter">A</span>nalysis and</div>
+                <div><span class="cetara-letter">R</span>emedi<span class="cetara-letter">A</span>tion</div>
+            </div>
+            <div class="cetara-description">
+                <p>
+                    Cetara is inspired by whales, classified in the order <em>Cetacea</em>, for their efficient natural water filtration. Just as baleen whales filter vast quantities of seawater to sustain life, Cetara uses cutting-edge technology to empower researchers to keep our water clean and safe.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section id="how-it-works" class="how-it-works">
+        <div class="section-header loading">
+            <h2>How We Build the Future of Water Treatment</h2>
+            <p>Our student-led research initiative transforms published data into actionable insights</p>
+        </div>
+        <div class="how-container">
+            <div class="steps-container loading">
+                <div class="step">
+                    <div class="step-icon">📄</div>
+                    <div class="step-content">
+                        <h3>1. Extract Research</h3>
+                        <p>Our team reviews published membrane performance papers from leading journals and institutions worldwide.</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-icon">📊</div>
+                    <div class="step-content">
+                        <h3>2. Structure Data</h3>
+                        <p>We organize findings into a centralized, accessible database with standardized metrics and classifications.</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-icon">📈</div>
+                    <div class="step-content">
+                        <h3>3. Visualize Trends</h3>
+                        <p>Interactive tools let researchers explore data by removal rate, molecular weight, membrane type, and more.</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-icon">💡</div>
+                    <div class="step-content">
+                        <h3>4. Recommend Solutions</h3>
+                        <p>AI-powered insights suggest optimal membrane solutions based on empirical evidence and performance data.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="how-visual loading">
+                <img src="https://raw.githubusercontent.com/MSan789/Cetara/e532d444c136f0ff41b61047e603dadaace67b0d/table_preview.JPG" alt="Research data preview showing structured membrane performance data" />
+            </div>
+        </div>
+    </section>
+
+    <!-- Data Visualization Section -->
+    <section id="visualizations" class="data-viz-section">
+        <div class="viz-container">
+            <div class="viz-visual loading">
+                <img src="https://raw.githubusercontent.com/MSan789/Cetara/76f70f98756a3c654077e466782e3390e88cae88/tradeoffs.png" alt="Tradeoffs diagram" />
+            </div>
+            <div class="viz-content loading">
+                <h2>Explore Our Interactive Visualizations</h2>
+                <p>
+                    Discover PFAS membrane removal trends through our dynamic visualization platform. Filter by removal rate, molecular weight, and membrane type to uncover insights that drive innovation in water treatment technology.
+                </p>
+                <p>
+                    Built by students and researchers collaborating with water treatment experts, our platform makes complex membrane performance data accessible to everyone working toward cleaner water solutions.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Partnership Section -->
+    <section id="partnerships" class="partnership-section">
+        <div class="partnership-container">
+            <div class="partnership-content loading">
+                <h2>Built by Students & Researchers</h2>
+                <p>
+                    Join us in scaling this open research initiative. We welcome collaborations with universities, water utilities, and filtration experts who share our vision of transparent, data-driven water treatment solutions.
+                </p>
+                <p>
+                    Our team of student researchers works alongside industry professionals to ensure our platform serves the real needs of the water treatment community.
+                </p>
+            </div>
+            <div class="partnership-visual loading">
+                <img src="https://github.com/MSan789/Cetara/raw/23dd47fc225c284ed36c0eb1fa87aa61765c2da2/asu.png" alt="Arizona State University partnership" />
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section loading">
+        <div class="cta-content">
+            <h2>Ready to Dive Into Water Treatment Data?</h2>
+            <p>Join researchers, students, and water treatment professionals who are already using Cetara to advance membrane technology and improve water quality worldwide.</p>
+        </div>
+    </section>
+
+ <!-- Footer -->
+    <div w3-include-html="parts/footer.html"></div>
+    <script src="js/include_html.js"></script>
+    <script>
+      includeHTML(() => {
+        if (typeof updateNavbarLinks === 'function') {
+          updateNavbarLinks();
+        } 
+        if (typeof createParticles === 'function') {
+          createParticles(); 
+        }
+      });
+    </script>
+    <script src="js/navbarscript.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+
+</body>
+</html>

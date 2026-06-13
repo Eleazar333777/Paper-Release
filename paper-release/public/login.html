@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Login - CETARA</title>
+
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="images/cetara.ico" />
+
+    <!-- Dark Mode -->
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-blue: #0066ff;
+            --secondary-blue: #0052cc;
+            --accent-cyan: #00d4ff;
+            --dark-bg: #0a0e1a;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --text-primary: #ffffff;
+            --text-secondary: #b0c4de;
+            --gradient-primary: linear-gradient(135deg, #0066ff 0%, #00d4ff 100%);
+            --gradient-hero: linear-gradient(135deg, #0a0e1a 0%, #1a237e 50%, #0066ff 100%);
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --shadow-soft: 0 8px 32px rgba(0, 0, 0, 0.1);
+            --shadow-strong: 0 20px 60px rgba(0, 0, 0, 0.15);
+            --border-radius: 16px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--dark-bg);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            line-height: 1.6;
+            min-height: 100vh;
+            position: relative;
+            padding: 0;
+            margin: 0;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0.1; }
+            50% { transform: translateY(-100px) rotate(180deg); opacity: 0.3; }
+        }
+
+        
+        /* Main Layout */
+        .layout-container {
+            padding-top: 80px;
+            min-height: 100vh;
+        }
+
+        main {
+            min-height: calc(100vh - 80px);
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Hero Section */
+        #heroSection {
+            padding: 2rem 0;
+            text-align: center;
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        #heroSection h1 {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 800;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+        }
+
+        #heroSection p {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Login Section */
+        #loginSection {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        #loginSection h2 {
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        #loginSection h2::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 3px;
+            background: var(--gradient-primary);
+            border-radius: 2px;
+        }
+
+        .login-container {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            padding: 3rem;
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+            max-width: 450px;
+        }
+
+        .login-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient-primary);
+            border-radius: 30px 30px 0 0;
+        }
+
+        /* Form Styling */
+        #loginForm {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .input-wrapper, .password-wrapper {
+            position: relative;
+        }
+
+        .input-wrapper input, .password-wrapper input {
+            width: 100%;
+            padding: 1.2rem 1.5rem;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-primary);
+            font-size: 1rem;
+            font-weight: 500;
+            backdrop-filter: blur(10px);
+            transition: var(--transition);
+        }
+
+        .password-wrapper input {
+            padding-right: 3.5rem;
+        }
+
+        .input-wrapper input:focus, .password-wrapper input:focus {
+            outline: none;
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 0 0.2rem rgba(0, 212, 255, 0.25);
+            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .input-wrapper input::placeholder, .password-wrapper input::placeholder {
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        .toggle-eye {
+            position: absolute;
+            right: 1.2rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: var(--transition);
+            z-index: 10;
+        }
+
+        .toggle-eye:hover {
+            color: var(--accent-cyan);
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        /* Submit Button */
+        input[type="submit"] {
+            width: 100%;
+            padding: 1.2rem 2rem;
+            border: none;
+            border-radius: 15px;
+            background: var(--gradient-primary);
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        input[type="submit"]::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        input[type="submit"]:hover::before {
+            left: 100%;
+        }
+
+        input[type="submit"]:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 102, 255, 0.4);
+        }
+
+        /* Link Styling */
+        .login-container a {
+            color: var(--accent-cyan);
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .login-container a::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--accent-cyan);
+            transition: width 0.3s ease;
+        }
+
+        .login-container a:hover {
+            color: var(--primary-blue);
+        }
+
+        .login-container a:hover::after {
+            width: 100%;
+        }
+
+        /* Enhanced Dark Mode */
+        .dark-mode {
+            --text-primary: #0a0e1a;
+            --text-secondary: #374151;
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --gradient-primary: linear-gradient(135deg, #0ea5e9 0%, #1e40af 100%);
+        }
+
+        .dark-mode body {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            color: var(--text-primary);
+        }
+
+        .dark-mode .bg-animation {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        }
+
+        .dark-mode .bg-animation::before {
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(0,0,0,0.03)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+        }
+
+        .dark-mode .navbar {
+            background: rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .dark-mode #heroSection {
+            background: rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .dark-mode .login-container {
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .dark-mode .input-wrapper input,
+        .dark-mode .password-wrapper input {
+            background: rgba(255, 255, 255, 0.9);
+            color: var(--text-primary);
+            border-color: rgba(0, 0, 0, 0.1);
+        }
+
+        .dark-mode .input-wrapper input:focus,
+        .dark-mode .password-wrapper input:focus {
+            background: rgba(255, 255, 255, 1);
+            border-color: #0ea5e9;
+            box-shadow: 0 0 0 0.2rem rgba(14, 165, 233, 0.25);
+        }
+
+        .dark-mode #darkModeToggle {
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid rgba(0, 0, 0, 0.1);
+            color: var(--text-primary);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .layout-container {
+                padding-top: 70px;
+            }
+
+            #heroSection {
+                padding: 1.5rem 1rem;
+            }
+
+            #loginSection {
+                padding: 1rem;
+            }
+
+            .login-container {
+                padding: 2rem 1.5rem;
+            }
+
+            #loginSection h2 {
+                font-size: 2rem;
+            }
+
+            #darkModeToggle {
+                bottom: 1rem;
+                right: 1rem;
+                width: 3rem;
+                height: 3rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .login-container {
+                padding: 1.5rem 1rem;
+            }
+
+            #loginSection h2 {
+                font-size: 1.8rem;
+            }
+        }
+
+        /* Loading Animation */
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .login-container {
+            animation: slideInUp 0.6s ease-out;
+        }
+
+        #heroSection {
+            animation: slideInUp 0.6s ease-out 0.1s both;
+        }
+    </style>
+</head>
+
+<body class="layout-container">
+    <div w3-include-html="parts/background.html"></div>
+    <div w3-include-html="parts/navbar.html"></div>
+
+    <main>
+        <!-- Hero Section -->
+        <div id="heroSection">
+            <section class="text-center px-5 pt-4 pb-1">
+                <h1 class="display-5">Clean Water. Transparent Data.</h1>
+                <p class="lead">Explore the latest in PFAS removal research</p>
+            </section>
+        </div>
+
+        <!-- Login Section -->
+        <div id="loginSection" class="container text-center">
+            <h2 class="mt-4">Login</h2>
+            <div class="login-container">
+                <form id="loginForm">
+                    <div class="input-wrapper">
+                        <input type="text" id="username" placeholder="Username" required />
+                    </div>
+                    <div class="password-wrapper">
+                        <input type="password" id="password" placeholder="Password" required />
+                        <i class="bi bi-eye toggle-eye"></i>
+                    </div>
+                    <input type="submit" value="Login" />
+                </form>
+                <a href="requestaccount.html">Don't have an account? Request one here!</a>
+            </div>
+        </div>
+    </main>
+
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+
+            // Toggle password visibility
+            document.querySelector(".toggle-eye").addEventListener("click", function () {
+                const pwd = document.getElementById("password");
+                if (pwd.type === "password") {
+                    pwd.type = "text";
+                    this.classList.replace("bi-eye", "bi-eye-slash");
+                } else {
+                    pwd.type = "password";
+                    this.classList.replace("bi-eye-slash", "bi-eye");
+                }
+            });
+
+            // Handle login
+            document.getElementById("loginForm").addEventListener("submit", async function (e) {
+                e.preventDefault();
+                const username = document.getElementById("username").value;
+                const password = document.getElementById("password").value;
+
+                try {
+                    const res = await fetch("/login", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ username, password })
+                    });
+
+                    const data = await res.json();
+                    if (!res.ok) throw new Error(data.error || "Login failed");
+
+                    localStorage.setItem("token", data.token);
+                    window.location.href = "index.html";
+
+                } catch (err) {
+                    alert("Login failed: " + err.message);
+                }
+            });
+        });
+    </script>
+
+    <!-- Include your existing scripts -->
+    <script src="js/script.js"></script>
+
+    
+    <!-- Footer -->
+    <div w3-include-html="parts/footer.html"></div>
+    <script src="js/include_html.js"></script>
+    <script>
+      includeHTML(() => {
+        if (typeof updateNavbarLinks === 'function') {
+          updateNavbarLinks();
+        } 
+        if (typeof createParticles === 'function') {
+          createParticles(); 
+        }
+      });
+    </script>
+    <script src="js/navbarscript.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+
+</body>
+</html>

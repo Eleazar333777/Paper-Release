@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Cetara — GPT Demo</title>
+  <link rel="icon" type="image/x-icon" href="images/cetara.ico">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+
+  <style>
+    :root{
+      --primary-blue: #0066ff;
+      --accent-cyan: #00d4ff;
+      --text-white: #ffffff;
+      --dark-bg: #0a0e1a;
+      --card-bg: rgba(255,255,255,0.04);
+      --text-secondary: #b0c4de;
+      --gradient: linear-gradient(135deg,#0066ff 0%,#00d4ff 100%);
+    }
+
+    body{
+      font-family: 'Poppins', sans-serif;
+      background: var(--dark-bg);
+      color: var(--text-white);
+      line-height: 1.6;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+    }
+
+    .page-hero{
+      padding: 6rem 1rem 3rem;
+      text-align: center;
+    }
+
+    .page-hero h1{
+      font-size: clamp(1.6rem, 3vw, 2.4rem);
+      font-weight: 700;
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.5rem;
+    }
+
+    .page-hero p.lead{
+      color: var(--text-secondary);
+      margin-bottom: 1.25rem;
+    }
+
+    .demo-container{
+      max-width: 1100px;
+      margin: 0 auto 3rem;
+      padding: 1rem;
+      display: grid;
+      grid-template-columns: 1fr 360px;
+      gap: 1.5rem;
+      align-items: start;
+    }
+
+    /* video card */
+    .video-card{
+      background: var(--card-bg);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 14px;
+      padding: 1rem;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      overflow: hidden;
+    }
+
+    .video-wrap{
+      position: relative;
+      padding-top: 56.25%;
+      border-radius: 10px;
+      overflow: hidden;
+      background: #000;
+    }
+
+    .video-wrap video,
+    .video-wrap iframe {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      border: 0;
+    }
+
+    .video-caption{
+      margin-top: 0.75rem;
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+    }
+
+    /* aside / waitlist */
+    .aside-card{
+      background: linear-gradient(180deg, rgba(0,102,255,0.06), rgba(0,0,0,0.03));
+      border-radius: 14px;
+      padding: 1.25rem;
+      border: 1px solid rgba(255,255,255,0.04);
+      text-align: left;
+      display:flex;
+      flex-direction:column;
+      gap:1rem;
+      height: fit-content;
+    }
+
+    .aside-card h3{
+      margin:0;
+      font-size:1.1rem;
+    }
+
+    .aside-card p{
+      color: var(--text-secondary);
+      margin:0;
+      font-size:0.95rem;
+    }
+
+    .btn-waitlist{
+      background: var(--primary-blue);
+      border: none;
+      color: white;
+      padding: 0.6rem 1rem;
+      border-radius: 10px;
+      font-weight: 600;
+      box-shadow: 0 8px 20px rgba(0,102,255,0.12);
+      transition: transform .08s ease, box-shadow .08s ease;
+    }
+
+    .btn-waitlist:hover{
+      transform: translateY(-2px);
+      box-shadow: 0 14px 30px rgba(0,102,255,0.18);
+    }
+
+    .muted-small{
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+    }
+
+    /* responsive */
+    @media (max-width: 992px){
+      .demo-container{
+        grid-template-columns: 1fr;
+      }
+
+      .aside-card{
+        order: 2;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- include common parts -->
+  <div w3-include-html="parts/background.html"></div>
+  <div w3-include-html="parts/navbar.html"></div>
+
+  <main class="container-fluid">
+    <header class="page-hero">
+      <h1>Try CetaraGPT — demo</h1>
+      <p class="lead">Watch a short demo of how our GPT-powered assistant helps with understanding membrane performance and suggests membrane selection options for PFAS removal and remediation.</p>
+    </header>
+
+    <section class="demo-container">
+      <!-- Video / Demo -->
+      <div class="video-card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;">
+          <div>
+            <strong>Demo: CetaraGPT in action</strong>
+            <div class="muted-small">A short walkthrough of the assistant on our curated research data.</div>
+          </div>
+          <div class="muted-small">Duration: 43s</div>
+        </div>
+
+        <div class="video-wrap" aria-label="GPT demo video">
+          <!-- Preferred: local MP4 (replace path if needed) -->
+          <video controls playsinline poster="images/gpt_demo_poster.jpg">
+            <source src="videos/gpt_demo.mp4" type="video/mp4">
+            <!-- Fallback to YouTube embed if MP4 missing -->
+            Your browser does not support the video tag. You can watch the demo on
+            <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" target="_blank" rel="noopener">YouTube</a>.
+          </video>
+        </div>
+
+        <div class="video-caption">
+          Tip: press play to see a typical CetaraGPT session that highlights how to find removal-rate trends and other PFAS removal insights.
+        </div>
+      </div>
+
+      <!-- Aside / Waitlist -->
+      <aside class="aside-card" aria-labelledby="waitlistTitle">
+        <div>
+          <h3 id="waitlistTitle">Join the waitlist</h3>
+          <p>We’re rolling out access in waves. Add your details and we’ll invite you when your tier opens.</p>
+        </div>
+
+        <div>
+          <strong class="muted-small">What we ask</strong>
+          <p class="muted-small">Name, email, and institution/organization</p>
+        </div>
+
+        <div style="display:flex;gap:0.5rem;flex-direction:column;">
+          <!-- REPLACE THE URL below with your actual Google Form link -->
+          <a id="waitlistLink" class="btn btn-waitlist" href="https://docs.google.com/forms/d/e/1FAIpQLScspryJ3sftvfvrGu_kh8hR78uZL-L-a4bwINvqi6_C_3aMhg/viewform?usp=publish-editor" target="_blank" rel="noopener noreferrer">Join Waitlist — Open Form</a>
+
+          <button id="demoRequestBtn" class="btn btn-outline-light" type="button"
+                  onclick="openForm();">
+            Request a live demo
+          </button>
+
+          <div class="muted-small">
+            We respect your privacy — emails used only to manage invites. No spam.
+          </div>
+        </div>
+
+        <div style="margin-top:0.5rem;font-size:0.9rem;color:var(--text-secondary);">
+          <strong>Need help?</strong> Contact <a href="mailto:eripsam@asu.edu" style="color:var(--accent-cyan)">eripsam@asu.edu</a>
+        </div>
+      </aside>
+    </section>
+
+    <!-- Short FAQ / How it works -->
+    <section style="max-width:1100px;margin:0 auto;padding:2rem 1rem 6rem;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;">
+        <div style="background:var(--card-bg);padding:1rem;border-radius:12px;border:1px solid rgba(255,255,255,0.04)">
+          <h4>What's in the demo?</h4>
+          <p class="muted-small">The demo shows how the assistant ingests a structured data sample, answers targeted queries about removal performance, and suggests next steps (e.g. experiments to run or membranes to compare).</p>
+        </div>
+
+        <div style="background:var(--card-bg);padding:1rem;border-radius:12px;border:1px solid rgba(255,255,255,0.04)">
+          <h4>Privacy & Data</h4>
+          <p class="muted-small">Demo data is synthetic or anonymized. When we enable your account, you can choose what data to share with the assistant.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div w3-include-html="parts/footer.html"></div>
+
+  <script src="js/include_html.js"></script>
+  <script>
+    // Called by the "Request a live demo" button if you want it to reuse the same form link
+    function openForm(){
+      const url = document.getElementById('waitlistLink').href;
+      if(!url || url === 'GOOGLE_FORM_URL'){
+        // Replace with a gentle fallback if the owner hasn't set the URL yet
+        alert('Please replace the GOOGLE_FORM_URL placeholder in gptdemo.html with your Google Form share link.');
+        return;
+      }
+      window.open(url, '_blank', 'noopener');
+    }
+
+    // initialize included parts
+    includeHTML(() => {
+      if (typeof updateNavbarLinks === 'function') updateNavbarLinks();
+      if (typeof createParticles === 'function') createParticles();
+    });
+  </script>
+
+  <script src="js/navbarscript.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+</body>
+</html>

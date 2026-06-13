@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Submit Your Data - CETARA</title>
+
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="images/cetara.ico" />
+
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-blue: #0066ff;
+            --secondary-blue: #0052cc;
+            --accent-cyan: #00d4ff;
+            --dark-bg: #0a0e1a;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --text-primary: #ffffff;
+            --text-secondary: #b0c4de;
+            --gradient-primary: linear-gradient(135deg, #0066ff 0%, #00d4ff 100%);
+            --gradient-hero: linear-gradient(135deg, #0a0e1a 0%, #1a237e 50%, #0066ff 100%);
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --shadow-soft: 0 8px 32px rgba(0, 0, 0, 0.1);
+            --shadow-strong: 0 20px 60px rgba(0, 0, 0, 0.15);
+            --border-radius: 16px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--dark-bg);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            line-height: 1.6;
+            min-height: 100vh;
+            position: relative;
+            padding: 0;
+            margin: 0;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0.1; }
+            50% { transform: translateY(-100px) rotate(180deg); opacity: 0.3; }
+        }
+
+        /* Main Content */
+        .main-content {
+            padding-top: 100px;
+            min-height: 100vh;
+            padding-bottom: 2rem;
+        }
+
+        /* Submit Section */
+        #submit-section {
+            max-width: 900px;
+            margin: 2rem auto;
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            padding: 3rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #submit-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient-primary);
+            border-radius: 30px 30px 0 0;
+        }
+
+        #submit-section h2 {
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+            font-size: clamp(2rem, 4vw, 2.5rem);
+            margin-bottom: 1.5rem;
+            position: relative;
+            text-align: center;
+        }
+
+        #submit-section h2::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background: var(--gradient-primary);
+            border-radius: 2px;
+        }
+
+        #submit-section p {
+            font-size: 1.1rem;
+            text-align: center;
+            margin-bottom: 2rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* Form Styling */
+        .form-label {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.8rem;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: block;
+        }
+
+        .form-control, .form-select {
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 1rem 1.2rem;
+            font-weight: 500;
+            transition: var(--transition);
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-primary);
+            backdrop-filter: blur(10px);
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 0 0.2rem rgba(0, 212, 255, 0.25);
+            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.08);
+            outline: none;
+        }
+
+        .form-control::placeholder {
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        .form-control[type="file"] {
+            padding: 0.8rem 1.2rem;
+            cursor: pointer;
+        }
+
+        .form-control[type="file"]::-webkit-file-upload-button {
+            background: var(--gradient-primary);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            padding: 0.5rem 1rem;
+            margin-right: 1rem;
+            cursor: pointer;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .form-control[type="file"]::-webkit-file-upload-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(0, 102, 255, 0.3);
+        }
+
+        /* Row and Column Layout */
+        .row {
+            display: flex;
+            flex-wrap: wrap;
+            margin: 0 -0.75rem;
+        }
+
+        .col-md-6 {
+            flex: 0 0 50%;
+            max-width: 50%;
+            padding: 0 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 15px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 1rem;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-primary {
+            background: var(--gradient-primary);
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+
+        .btn-upload {
+            width: 100%;
+            margin-top: 1rem;
+        }
+
+        /* Message Styling */
+        #upload-message, #single-entry-message {
+            margin-top: 1.5rem;
+            padding: 1rem 1.5rem;
+            border-radius: 15px;
+            font-weight: 500;
+            text-align: center;
+            min-height: 1rem;
+        }
+
+        .text-success {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .text-danger {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        /* Divider */
+        hr {
+            border: none;
+            height: 2px;
+            background: var(--gradient-primary);
+            margin: 3rem 0;
+            border-radius: 1px;
+            opacity: 0.3;
+        }
+
+        /* Enhanced Dark Mode */
+        .dark-mode {
+            --text-primary: #0a0e1a;
+            --text-secondary: #374151;
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --gradient-primary: linear-gradient(135deg, #0ea5e9 0%, #1e40af 100%);
+        }
+
+        .dark-mode body {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            color: var(--text-primary);
+        }
+
+        .dark-mode .bg-animation {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        }
+
+        .dark-mode .bg-animation::before {
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(0,0,0,0.03)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+        }
+
+        .dark-mode .navbar {
+            background: rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .dark-mode #submit-section {
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .dark-mode .form-control,
+        .dark-mode .form-select {
+            background: rgba(255, 255, 255, 0.9);
+            color: var(--text-primary);
+            border-color: rgba(0, 0, 0, 0.1);
+        }
+
+        .dark-mode .form-control:focus,
+        .dark-mode .form-select:focus {
+            background: rgba(255, 255, 255, 1);
+            border-color: #0ea5e9;
+            box-shadow: 0 0 0 0.2rem rgba(14, 165, 233, 0.25);
+        }
+
+        .dark-mode #darkModeToggle {
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid rgba(0, 0, 0, 0.1);
+            color: var(--text-primary);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+
+            #submit-section {
+                margin: 1rem;
+                padding: 2rem 1.5rem;
+            }
+
+            #submit-section h2 {
+                font-size: 2rem;
+            }
+
+            .col-md-6 {
+                flex: 0 0 100%;
+                max-width: 100%;
+            }
+
+            #darkModeToggle {
+                bottom: 1rem;
+                right: 1rem;
+                width: 3rem;
+                height: 3rem;
+            }
+        }
+
+        /* Loading Animation */
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        #submit-section {
+            animation: slideInUp 0.6s ease-out;
+        }
+    </style>
+</head>
+
+<body>
+    <div w3-include-html="parts/background.html"></div>
+    <div w3-include-html="parts/navbar.html"></div>
+
+    <div class="main-content">
+        <!-- Submit Section -->
+        <section id="submit-section">
+            <!-- <h2>Upload Your Excel File</h2>
+            <p>
+                Please choose an Excel file (.xlsx or .xls) containing your PFAS
+                data. Our team will review and integrate it into the database.
+            </p>
+            <form id="upload-form" enctype="multipart/form-data">
+                <div class="mb-3">
+                    <label for="excelFile" class="form-label">Select Excel file</label>
+                    <input
+                        class="form-control"
+                        type="file"
+                        id="excelFile"
+                        name="excelFile"
+                        accept=".xlsx,.xls"
+                        required
+                    />
+                </div>
+                <button type="submit" class="btn btn-primary btn-upload">
+                    <i class="bi bi-cloud-upload me-2"></i>Upload File
+                </button>
+            </form>
+            <div id="upload-message"></div>
+
+            <hr /> -->
+
+            <h2 class="mt-4">Submit a Single Entry</h2>
+            <p class="mb-4">
+                If you have data for just one membrane, fill out the form below.
+            </p>
+            <form id="single-entry-form">
+                <div class="row">
+                    <div class="col-md-6">
+                        <label for="membrane" class="form-label">Membrane</label>
+                        <input
+                            type="text"
+                            class="form-control"
+                            id="membrane"
+                            name="membrane"
+                            placeholder="e.g., Membrane A"
+                            required
+                        />
+                    </div>
+                    <div class="col-md-6">
+                        <label for="mwco_da" class="form-label">MWCO (Da)</label>
+                        <input
+                            type="number"
+                            step="any"
+                            class="form-control"
+                            id="mwco_da"
+                            name="mwco_da"
+                            placeholder="e.g., 1000"
+                            required
+                        />
+                    </div>
+                    <div class="col-md-6">
+                        <label for="pfas" class="form-label">PFAS</label>
+                        <input
+                            type="text"
+                            class="form-control"
+                            id="pfas"
+                            name="pfas"
+                            placeholder="e.g., PFOA"
+                            required
+                        />
+                    </div>
+                    <div class="col-md-6">
+                        <label for="removal_rate" class="form-label">Removal Rate (%)</label>
+                        <input
+                            type="number"
+                            step="any"
+                            class="form-control"
+                            id="removal_rate"
+                            name="removal_rate"
+                            placeholder="e.g., 95"
+                            required
+                        />
+                    </div>
+                    <div class="col-md-6">
+                        <label for="isoelectric_point" class="form-label">Isoelectric Point</label>
+                        <input
+                            type="number"
+                            step="any"
+                            class="form-control"
+                            id="isoelectric_point"
+                            name="isoelectric_point"
+                            placeholder="e.g., 7.0"
+                        />
+                    </div>
+                    <div class="col-md-6">
+                        <label for="water_contact_angle" class="form-label">Water Contact Angle (°)</label>
+                        <input
+                            type="number"
+                            step="any"
+                            class="form-control"
+                            id="water_contact_angle"
+                            name="water_contact_angle"
+                            placeholder="e.g., 65"
+                        />
+                    </div>
+                    <div class="col-md-6">
+                        <label for="mw" class="form-label">Molecular Weight (Da)</label>
+                        <input
+                            type="number"
+                            step="any"
+                            class="form-control"
+                            id="mw"
+                            name="mw"
+                            placeholder="e.g., 418.07"
+                        />
+                    </div>
+                    <div class="col-md-6">
+                        <label for="smiles" class="form-label">SMILES</label>
+                        <input
+                            type="text"
+                            class="form-control"
+                            id="smiles"
+                            name="smiles"
+                            placeholder="e.g., C(C(=O)O)C(F)(F)F"
+                        />
+                    </div>
+                    <div class="col-md-6">
+                        <label for="compound_size" class="form-label">Compound Size (Å)</label>
+                        <input
+                            type="number"
+                            step="any"
+                            class="form-control"
+                            id="compound_size"
+                            name="compound_size"
+                            placeholder="e.g., 5.5"
+                        />
+                    </div>
+                    <div class="col-md-6">
+                        <label for="log_kow" class="form-label">log K<sub>ow</sub></label>
+                        <input
+                            type="number"
+                            step="any"
+                            class="form-control"
+                            id="log_kow"
+                            name="log_kow"
+                            placeholder="e.g., 4.3"
+                        />
+                    </div>
+                    <div class="col-md-6">
+                        <label for="pka" class="form-label">pK<sub>a</sub></label>
+                        <input
+                            type="number"
+                            step="any"
+                            class="form-control"
+                            id="pka"
+                            name="pka"
+                            placeholder="e.g., 3.5"
+                        />
+                    </div>
+                    <div class="col-md-6">
+                        <label for="initial_concentration" class="form-label">Initial Concentration (mg/L)</label>
+                        <input
+                            type="number"
+                            step="any"
+                            class="form-control"
+                            id="initial_concentration"
+                            name="initial_concentration"
+                            placeholder="e.g., 10"
+                        />
+                    </div>
+                    <div class="col-md-6">
+                        <label for="is_mm" class="form-label">Is Monomodal?</label>
+                        <select class="form-select" id="is_mm" name="is_mm">
+                            <option value="" selected disabled>Select one</option>
+                            <option value="true">Yes</option>
+                            <option value="false">No</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="pressure" class="form-label">Pressure (bar)</label>
+                        <input
+                            type="number"
+                            step="any"
+                            class="form-control"
+                            id="pressure"
+                            name="pressure"
+                            placeholder="e.g., 5"
+                        />
+                    </div>
+                    <div class="col-md-6">
+                        <label for="ph" class="form-label">pH</label>
+                        <input
+                            type="number"
+                            step="any"
+                            class="form-control"
+                            id="ph"
+                            name="ph"
+                            placeholder="e.g., 7.2"
+                        />
+                    </div>
+                    <div class="col-md-6">
+                        <label for="doi_reference" class="form-label">DOI Reference</label>
+                        <input
+                            type="text"
+                            class="form-control"
+                            id="doi_reference"
+                            name="doi_reference"
+                            placeholder="e.g., 10.1021/acs.est.0c01234"
+                        />
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-success btn-upload mt-3">
+                    <i class="bi bi-plus-circle me-2"></i>Submit Single Entry
+                </button>
+            </form>
+            <div id="single-entry-message"></div>
+        </section>
+    </div>
+
+
+    <script>
+        // File upload logic
+        // const uploadForm = document.getElementById("upload-form");
+        // const uploadMsg = document.getElementById("upload-message");
+        // uploadForm.addEventListener("submit", async (e) => {
+        //     e.preventDefault();
+        //     uploadMsg.textContent = "Uploading…";
+        //     uploadMsg.className = ""; // Reset classes
+
+        //     const formData = new FormData(uploadForm);
+        //     try {
+        //         const res = await fetch("/upload", {
+        //             method: "POST",
+        //             headers: {
+        //                 Authorization: `Bearer ${localStorage.getItem("token")}`,
+        //             },
+        //             body: formData,
+        //         });
+        //         const json = await res.json();
+        //         if (res.ok && json.success) {
+        //             uploadMsg.textContent = "✅ " + json.message;
+        //             uploadMsg.classList.remove("text-danger");
+        //             uploadMsg.classList.add("text-success");
+        //             uploadForm.reset();
+        //         } else {
+        //             uploadMsg.textContent = "❌ " + (json.error || "Upload failed.");
+        //             uploadMsg.classList.remove("text-success");
+        //             uploadMsg.classList.add("text-danger");
+        //         }
+        //     } catch (err) {
+        //         uploadMsg.textContent = "❌ Network error.";
+        //         uploadMsg.classList.remove("text-success");
+        //         uploadMsg.classList.add("text-danger");
+        //     }
+        // });
+
+        // Single-entry submission logic
+        const singleForm = document.getElementById("single-entry-form");
+        const singleMsg = document.getElementById("single-entry-message");
+        singleForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            singleMsg.textContent = "Submitting…";
+            singleMsg.className = ""; // Reset classes
+
+            const data = {};
+            new FormData(singleForm).forEach((value, key) => {
+                data[key] = value;
+            });
+
+            if (data.is_mm === "true") {
+                data.is_mm = true;
+            } else if (data.is_mm === "false") {
+                data.is_mm = false;
+            } else {
+                data.is_mm = null;
+            }
+
+            try {
+                const res = await fetch("/single_entries", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${localStorage.getItem("token")}`,
+                    },
+                    body: JSON.stringify(data),
+                });
+                const json = await res.json();
+                if (res.ok && json.success) {
+                    singleMsg.textContent = "✅ " + json.message;
+                    singleMsg.classList.remove("text-danger");
+                    singleMsg.classList.add("text-success");
+                    singleForm.reset();
+                } else {
+                    singleMsg.textContent = "❌ " + (json.error || "Submission failed.");
+                    singleMsg.classList.remove("text-success");
+                    singleMsg.classList.add("text-danger");
+                }
+            } catch (err) {
+                singleMsg.textContent = "❌ Network error.";
+                singleMsg.classList.remove("text-success");
+                singleMsg.classList.add("text-danger");
+            }
+        });
+
+        function logout() {
+            localStorage.removeItem("token");
+            location.href = "index.html";
+        }
+    </script>
+
+    <!-- Include your existing scripts -->
+    <script src="js/script.js"></script>
+      <div w3-include-html="parts/footer.html"></div>
+    <script src="js/include_html.js"></script>
+    <script>
+      includeHTML(() => {
+        if (typeof updateNavbarLinks === 'function') {
+          updateNavbarLinks();
+        } 
+        if (typeof createParticles === 'function') {
+          createParticles(); 
+        }
+      });
+    </script>
+    <script src="js/navbarscript.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+
+
+</body>
+</html>

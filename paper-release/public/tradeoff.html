@@ -1,0 +1,1751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PFBS Membrane Performance Analysis</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="images/cetara.ico" />
+
+    <!-- Bootstrap CSS (needed for navbar) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous" />
+
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
+        }
+
+        body.layout-container {
+            padding-top: 72px; /* for navbar spacing */
+        }
+
+        .main-content {
+            background: linear-gradient(135deg, #f2f2f2 0%, #e8f4fd 100%);
+            min-height: 100vh;
+            padding: 30px 20px;
+        }
+
+        .container {
+            max-width: 1300px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(16, 156, 204, 0.12);
+            overflow: hidden;
+            border: 1px solid rgba(16, 156, 204, 0.08);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #109CCC 0%, #0e89b3 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #109CCC 0%, #2A9DDB 50%, #109CCC 100%);
+        }
+
+        .header h1 {
+            font-size: 2.4rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            letter-spacing: -0.02em;
+        }
+
+        .header p {
+            font-size: 1.15rem;
+            opacity: 0.95;
+            font-weight: 400;
+        }
+
+        .loading-spinner {
+            display: none;
+            text-align: center;
+            padding: 50px;
+            color: #109CCC;
+            font-size: 1.2rem;
+        }
+
+        .loading-spinner.show {
+            display: block;
+        }
+
+        .error-message {
+            display: none;
+            text-align: center;
+            padding: 30px;
+            color: #e74c3c;
+            background: #fdf2f2;
+            margin: 20px;
+            border-radius: 10px;
+            border: 1px solid #f5c6cb;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .controls {
+            padding: 35px 40px;
+            background: linear-gradient(135deg, #f8fcff 0%, #ffffff 100%);
+            border-bottom: 1px solid #e1f5fe;
+        }
+
+        .control-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 28px;
+            margin-bottom: 28px;
+        }
+
+        .control-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .control-item label {
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #1464b4;
+            font-size: 1rem;
+        }
+
+        .control-item select, .control-item input {
+            padding: 14px 18px;
+            border: 2px solid #e1f5fe;
+            border-radius: 10px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            background: white;
+            color: #333;
+        }
+
+        .control-item select:focus, .control-item input:focus {
+            outline: none;
+            border-color: #109CCC;
+            box-shadow: 0 0 0 4px rgba(16, 156, 204, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .control-item select:hover, .control-item input:hover {
+            border-color: #2A9DDB;
+        }
+
+        .instructions {
+            background: linear-gradient(135deg, #f8fcff 0%, #e8f4fd 100%);
+            padding: 28px 32px;
+            border-radius: 15px;
+            border: 2px solid #e1f5fe;
+            box-shadow: 0 4px 16px rgba(16, 156, 204, 0.08);
+            position: relative;
+        }
+
+        .instructions::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #109CCC 0%, #2A9DDB 100%);
+            border-radius: 15px 15px 0 0;
+        }
+
+        .instructions h3 {
+            color: #109CCC;
+            margin-bottom: 18px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .instructions ul {
+            list-style: none;
+            padding-left: 0;
+            margin: 0;
+        }
+
+        .instructions li {
+            margin-bottom: 10px;
+            padding-left: 28px;
+            position: relative;
+            color: #37474f;
+            font-size: 1rem;
+            line-height: 1.5;
+            display: flex;
+            align-items: center;
+        }
+
+        .instructions li::before {
+            content: "●";
+            color: #109CCC;
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .stats-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 28px;
+            margin-bottom: 35px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #109CCC 0%, #0e89b3 100%);
+            color: white;
+            padding: 30px 28px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 6px 20px rgba(16, 156, 204, 0.25);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #2A9DDB 0%, #109CCC 100%);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(16, 156, 204, 0.35);
+        }
+
+        .stat-value {
+            font-size: 2.6rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: -0.02em;
+        }
+
+        .stat-label {
+            font-size: 0.95rem;
+            opacity: 0.92;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+
+        .chart-container {
+            padding: 50px 40px 60px;
+            background: white;
+        }
+
+        .chart-wrapper {
+            display: grid;
+            grid-template-columns: 300px 1fr 300px;
+            gap: 20px;
+            max-width: 1500px;
+            margin: 0 auto;
+            align-items: start;
+        }
+
+        .left-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-items: stretch;
+        }
+
+        .right-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-items: stretch;
+        }
+
+        .legend-panel h4,
+        .instructions h3 {
+            color: #109CCC;
+            margin-bottom: 18px;
+            margin-top: 0;
+            font-size: 1.2rem;
+            font-weight: 600;
+            text-align: center;
+            line-height: 1.4;
+            padding-top: 0;
+        }
+
+        .center-panel {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .equation-panel {
+            background: linear-gradient(135deg, #f8fcff 0%, #e8f4fd 100%);
+            padding: 28px 32px;
+            border-radius: 15px;
+            border: 2px solid #e1f5fe;
+            box-shadow: 0 4px 16px rgba(16, 156, 204, 0.08);
+            position: relative;
+        }
+
+        .equation-panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #109CCC 0%, #2A9DDB 100%);
+            border-radius: 15px 15px 0 0;
+        }
+
+        .equation-panel h4 {
+            color: #109CCC;
+            margin-bottom: 18px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .equation {
+            font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+            font-size: 1.3rem;
+            color: #1464b4;
+            background: white;
+            padding: 16px 20px;
+            border-radius: 10px;
+            border: 1px solid #e1f5fe;
+            margin-bottom: 12px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-align: center;
+        }
+
+        .equation-note {
+            font-size: 0.9rem;
+            color: #6c757d;
+            line-height: 1.4;
+            text-align: center;
+        }
+
+        .legend-panel {
+            background: linear-gradient(135deg, #f8fcff 0%, #e8f4fd 100%);
+            padding: 28px 32px;
+            border-radius: 15px;
+            border: 2px solid #e1f5fe;
+            box-shadow: 0 4px 16px rgba(16, 156, 204, 0.08);
+            position: relative;
+        }
+
+        .legend-panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #109CCC 0%, #2A9DDB 100%);
+            border-radius: 15px 15px 0 0;
+        }
+
+        .legend-panel h4 {
+            color: #109CCC;
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .legend-items {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            font-weight: 500;
+            color: #37474f;
+            font-size: 1rem;
+            padding: 8px 16px;
+            background: white;
+            border-radius: 25px;
+            border: 1px solid #e1f5fe;
+            transition: all 0.3s ease;
+        }
+
+        .legend-item:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(16, 156, 204, 0.15);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 500;
+            color: #37474f;
+            font-size: 0.9rem;
+            padding: 6px 14px;
+            background: white;
+            border-radius: 25px;
+            border: 1px solid #e1f5fe;
+            transition: all 0.3s ease;
+        }
+
+        .equation {
+            font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+            font-size: 1.1rem;
+            color: #1464b4;
+            background: white;
+            padding: 14px 18px;
+            border-radius: 10px;
+            border: 1px solid #e1f5fe;
+            margin-bottom: 12px;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+            text-align: center;
+            line-height: 1.2;
+        }
+
+        .legend-color {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            border: 2px solid #37474f;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            flex-shrink: 0;
+        }
+
+        .filled {
+            background-color: #109CCC;
+            border-color: #109CCC;
+        }
+
+        .hollow {
+            background-color: white;
+            border-color: #109CCC;
+        }
+
+        .graph-container {
+            background: linear-gradient(135deg, #ffffff 0%, #f8fcff 100%);
+            padding: 20px 20px 60px 20px;
+            border-radius: 20px;
+            border: 2px solid #e1f5fe;
+            box-shadow: 0 8px 24px rgba(16, 156, 204, 0.12);
+            width: 100%;
+            max-width: 700px;
+            height: 650px;
+            position: relative;
+            margin: 0 auto;
+        }
+
+        .axis-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .custom-legend-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 500;
+            color: #37474f;
+            font-size: 0.9rem;
+            padding: 6px 14px;
+            background: white;
+            border-radius: 25px;
+            border: 1px solid #e1f5fe;
+            transition: all 0.3s ease;
+        }
+
+        .custom-legend-item:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(16, 156, 204, 0.15);
+        }
+
+        .custom-equation {
+            font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+            font-size: 1.1rem;
+            color: #1464b4;
+            background: white;
+            padding: 14px 18px;
+            border-radius: 10px;
+            border: 1px solid #e1f5fe;
+            margin-bottom: 12px;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+            text-align: center;
+            line-height: 1.2;
+        }
+
+        .custom-divider {
+            height: 2px;
+            background: linear-gradient(90deg, #109CCC 0%, #2A9DDB 100%);
+            margin: 30px 0;
+            border-radius: 1px;
+        }
+
+        .custom-left-panel {
+            height: 650px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: stretch;
+        }
+
+        .custom-legend-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            padding-top: 20px;
+        }
+
+        .custom-equation-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            padding-top: 10px;
+        }
+
+        .custom-right-panel {
+            height: 650px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: stretch;
+        }
+
+        .simple-divider {
+            height: 2px;
+            background: #109CCC;
+            margin: 30px 0;
+        }
+
+        .tall-left-panel {
+            height: 650px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .top-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .bottom-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .axis-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .controls {
+                padding: 25px 20px;
+            }
+
+            .chart-container {
+                padding: 30px 20px;
+            }
+
+            .chart-wrapper {
+                grid-template-columns: 1fr;
+                gap: 25px;
+            }
+
+            .left-panel, .right-panel {
+                order: 2;
+            }
+
+            .center-panel {
+                order: 1;
+            }
+
+            .graph-container {
+                width: 100%;
+                height: 500px;
+            }
+
+            .control-group {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .stats-panel {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 20px;
+            }
+
+            .equation {
+                font-size: 1.1rem;
+            }
+
+            .axis-controls {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .stats-panel {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body class="layout-container">
+    <div w3-include-html="parts/navbar.html"></div>
+
+    <div class="main-content">
+        <div class="container">
+        <div class="header">
+            <h1>PFBS Membrane Selectivity Analysis</h1>
+            <p>Focused Analysis of PFBS Compound Performance</p>
+        </div>
+
+        <div class="loading-spinner" id="loadingSpinner">
+            <div>Loading membrane data...</div>
+        </div>
+
+        <div class="error-message" id="errorMessage">
+            <strong>Error loading data.</strong><br>
+            Please check your authentication or try refreshing the page.
+        </div>
+
+        <div class="controls" id="controlsSection" style="display: none;">
+            <div class="stats-panel">
+                <div class="stat-card">
+                    <div class="stat-value" id="totalPoints">0</div>
+                    <div class="stat-label">Data Points</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="avgSelectivity">0</div>
+                    <div class="stat-label">Avg Selectivity</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="avgRemoval">0%</div>
+                    <div class="stat-label">Avg Removal</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="uniqueMembranes">0</div>
+                    <div class="stat-label">Membrane Types</div>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <div class="control-item">
+                    <label for="membraneFilter">Membrane Type:</label>
+                    <select id="membraneFilter">
+                        <option value="all">All Membrane Types</option>
+                    </select>
+                </div>
+                <div class="control-item">
+                    <label for="pfasFilter">PFAS Compound:</label>
+                    <select id="pfasFilter">
+                        <option value="all">All PFAS Compounds</option>
+                    </select>
+                </div>
+                <div class="control-item">
+                    <label for="chainLengthFilter">Chain Length:</label>
+                    <select id="chainLengthFilter">
+                        <option value="all">All Chain Lengths</option>
+                        <option value="short">Short-chain (C4-C6)</option>
+                        <option value="long">Long-chain (C7+)</option>
+                    </select>
+                </div>
+                <div class="control-item">
+                    <label for="functionalGroupFilter">Functional Group:</label>
+                    <select id="functionalGroupFilter">
+                        <option value="all">All Functional Groups</option>
+                        <option value="sulfonic">Sulfonic Acids (-SO₃H)</option>
+                        <option value="carboxylic">Carboxylic Acids (-COOH)</option>
+                        <option value="other">Other Groups</option>
+                    </select>
+                </div>
+                <div class="control-item">
+                    <label for="minRemovalFilter">Minimum Removal Rate: <span id="minRemovalValue">0%</span></label>
+                    <input type="range" id="minRemovalFilter" min="0" max="100" value="0" step="1">
+                </div>
+                <div class="control-item">
+                    <label for="logScaleToggle">
+                        <input type="checkbox" id="logScaleToggle" style="margin-right: 12px; transform: scale(1.2);">
+                        Use Logarithmic Scale
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <div class="chart-container" id="chartSection" style="display: none;">
+            <div class="chart-wrapper">
+                <!-- Left Panel: Legend and Equation with balanced sections -->
+                <div class="left-panel">
+                    <div class="legend-panel tall-left-panel">
+                        <!-- Legend Section (top half) -->
+                        <div class="legend-section top-section">
+                            <h4>Membrane Classifications</h4>
+                            <div class="legend-items" id="legendItems">
+                                <!-- Legend items will be populated dynamically -->
+                            </div>
+                        </div>
+
+                        <!-- Section Divider -->
+                        <div class="simple-divider"></div>
+
+                        <!-- Equation Section (bottom half) -->
+                        <div class="equation-section bottom-section">
+                            <h4>Upper Bound Relationship</h4>
+                            <div class="equation custom-equation">A/B = 1.11×10³×A⁻¹·⁷⁶</div>
+                            <p class="equation-note">
+                                Theoretical maximum selectivity limit where A represents water permanence and A/B represents water-solute selectivity.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Center Panel: Graph -->
+                <div class="center-panel">
+                    <div class="graph-container">
+                        <canvas id="membraneChart"></canvas>
+                        <div style="margin-top: 15px; text-align: center;">
+                            <button id="resetZoom" style="padding: 10px 20px; background: #109CCC; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600;">Reset Zoom</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Panel: Interactive Tools -->
+                <div class="right-panel">
+                    <div class="instructions custom-right-panel">
+                        <!-- Top section to match left panel structure -->
+                        <div style="flex: 1; display: flex; flex-direction: column; justify-content: flex-start; padding-top: 20px;">
+                            <h3>Interactive Analysis Tools</h3>
+                            <ul>
+                                <li>Hover over data points for comprehensive membrane specifications</li>
+                                <li>Use the mouse wheel to zoom in/out on the chart (pinch on mobile)</li>
+                                <li>Click and drag to pan around the chart (drag down moves view up)</li>
+                                <li>Use the "Reset Zoom" button to return to original view</li>
+                                <li>Use filters below to customize your analysis parameters</li>
+                                <li>Click on data points to access original research papers via DOI links</li>
+                            </ul>
+                        </div>
+                        
+                        <!-- Section Divider -->
+                        <div class="simple-divider"></div>
+                        
+                        <!-- Bottom section to match left panel structure -->
+                        <div style="flex: 1; display: flex; flex-direction: column; justify-content: flex-start; padding-top: 10px;">
+                            <!-- This space intentionally left empty to maintain symmetry -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div w3-include-html="parts/footer.html"></div>
+
+    <script>
+        // Register zoom plugin
+        if (typeof Chart !== 'undefined' && typeof zoomPlugin !== 'undefined') {
+            Chart.register(zoomPlugin);
+        }
+
+        let allData = [];
+        let filteredData = [];
+        let chart = null;
+        let cachedDatasets = null; // Cache computed datasets
+
+        // Field mappings for display
+        const fieldLabels = {
+            'water_permeance': 'Water permanence, A (L m⁻² h⁻¹ bar⁻¹)',
+            'water_solute_selectivity': 'Water-Solute selectivity, A/B (bar)',
+            'mwco_da': 'MWCO (Da)',
+            'removal_rate': 'Removal Rate (%)',
+            'compound_size': 'Compound Size (Å)',
+            'initial_concentration': 'Initial Concentration (ng/L)',
+            'pressure': 'Pressure (psi)',
+            'isoelectric_point': 'Isoelectric Point (pH)',
+            'water_contact_angle': 'Water Contact Angle (°)',
+            'log_kow': 'Log K_ow',
+            'pka': 'pKa',
+            'ph': 'pH'
+        };
+
+        // Color mapping for different membranes
+        const membraneColors = {
+            'NF270': '#109CCC',
+            'NF90': '#FF6384',
+            'XLE': '#FFCE56',
+            'BW30': '#9966FF',
+            'Unknown': '#C9CBCF'
+        };
+
+        // Check authentication
+        function checkAuth() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = 'login.html';
+                return false;
+            }
+            return true;
+        }
+
+        // Fetch data from API (using same approach as working chart)
+        async function fetchData() {
+            if (!checkAuth()) return;
+
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            const errorMessage = document.getElementById('errorMessage');
+            const controlsSection = document.getElementById('controlsSection');
+            const chartSection = document.getElementById('chartSection');
+
+            loadingSpinner.classList.add('show');
+            errorMessage.classList.remove('show');
+
+            try {
+                const token = localStorage.getItem('token');
+                console.log('Fetching data from /data endpoint...');
+                
+                const response = await fetch('/data', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                console.log('Response status:', response.status);
+
+                if (response.status === 401) {
+                    console.log('Authentication failed - redirecting to login');
+                    localStorage.removeItem('token');
+                    window.location.href = 'login.html';
+                    return;
+                }
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('API Error:', response.status, errorText);
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const rawData = await response.json();
+                console.log('Raw data received:', rawData.length, 'entries');
+
+                // Ensure data is an array
+                if (!Array.isArray(rawData)) {
+                    throw new Error('Data is not an array');
+                }
+
+                if (rawData.length === 0) {
+                    throw new Error('No data found in database');
+                }
+
+                // Process ALL data first (don't filter yet)
+                allData = rawData.filter(item => {
+                    return item &&
+                           typeof item === 'object' &&
+                           item.membrane &&
+                           item.pfas;
+                }).map(item => {
+                    // Use actual database values directly - no artificial generation
+                    const waterPermeance = parseFloat(item.water_permeance) || 
+                        parseFloat(item.mw) || 
+                        (item.mwco_da ? parseFloat(item.mwco_da) / 200 : null);
+                    
+                    const waterSoluteSelectivity = parseFloat(item.water_solute_selectivity) ||
+                        (parseFloat(item.removal_rate) ? parseFloat(item.removal_rate) / 10 : null);
+
+                    // Determine if commercial based on known commercial membrane names
+                    const isCommercial = ['NF270', 'NF90', 'BW30', 'XLE', 'SW30HR', 'TFC-SR2', 'NF-200', 'NF-400'].some(commercial =>
+                        item.membrane && item.membrane.toUpperCase().includes(commercial)
+                    );
+
+                    return {
+                        ...item,
+                        // Use actual database values when available
+                        water_permeance: waterPermeance,
+                        water_solute_selectivity: waterSoluteSelectivity,
+                        removal_rate: parseFloat(item.removal_rate) || 0,
+                        mwco_da: parseFloat(item.mwco_da) || null,
+                        pressure: parseFloat(item.pressure) || null,
+                        membrane_type: isCommercial ? 'Commercial' : 'Non-commercial',
+                        // Preserve all original database fields
+                        source: isCommercial ? item.manufacturer || 'Commercial' : 'Research Lab',
+                        material: item.material || 'Composite',
+                        operating_pressure: item.pressure || item.operating_pressure || null,
+                        temperature: item.temperature || null,
+                        ph_value: item.ph || item.ph_value || null,
+                        salt_concentration: item.salt_concentration || item.initial_concentration || null
+                    };
+                });
+
+                console.log('Total processed data:', allData.length, 'entries');
+                console.log('Available PFAS compounds:', [...new Set(allData.map(item => item.pfas))]);
+                
+                // Filter for PFBS by default (as per dropdown default)
+                filteredData = allData.filter(item => 
+                    item.pfas && (
+                        item.pfas.toLowerCase().includes('pfbs') ||
+                        item.pfas.toLowerCase().includes('perfluorobutanesulfonic') ||
+                        item.pfas.toLowerCase().includes('perfluorobutane sulfonic')
+                    )
+                );
+
+                console.log('PFBS data found:', filteredData.length, 'entries');
+
+                // If no PFBS data, show message but still initialize interface
+                if (filteredData.length === 0) {
+                    console.warn('No PFBS data found in database');
+                    // Keep filteredData empty for now - user can select "All PFAS Compounds"
+                }
+
+                // Initialize interface regardless of data
+                populateChartFilters();
+                updateStats();
+                updateChartLegend();
+                createChart();
+                setupEventListeners();
+
+                loadingSpinner.classList.remove('show');
+                controlsSection.style.display = 'block';
+                chartSection.style.display = 'block';
+                
+                console.log('✅ Page loaded successfully');
+
+            } catch (error) {
+                console.error('❌ Error fetching data:', error);
+                loadingSpinner.classList.remove('show');
+                errorMessage.classList.add('show');
+                errorMessage.innerHTML = `
+                    <strong>Error loading data:</strong><br>
+                    ${error.message}<br>
+                    <small>Check browser console for detailed error information.</small>
+                `;
+            }
+        }
+
+        // Populate filter dropdowns for chart
+        function populateChartFilters() {
+            try {
+                const membraneFilter = document.getElementById('membraneFilter');
+                const pfasFilter = document.getElementById('pfasFilter');
+
+                // Safety check
+                if (!allData || !Array.isArray(allData) || allData.length === 0) {
+                    return;
+                }
+
+                // Get unique values with better error handling
+                const membraneValues = allData.map(item => {
+                    if (!item || typeof item !== 'object') {
+                        return null;
+                    }
+                    return item.membrane;
+                }).filter(Boolean);
+
+                const membranes = [...new Set(membraneValues)].sort();
+
+                const pfasValues = allData.map(item => {
+                    if (!item || typeof item !== 'object') {
+                        return null;
+                    }
+                    return item.pfas;
+                }).filter(Boolean);
+
+                const pfasCompounds = [...new Set(pfasValues)].sort();
+
+                // Populate membrane filter
+                if (membraneFilter) {
+                    membraneFilter.innerHTML = '<option value="all">All Membrane Types</option>';
+                    membranes.forEach(membrane => {
+                        const option = document.createElement('option');
+                        option.value = membrane;
+                        option.textContent = membrane;
+                        membraneFilter.appendChild(option);
+                    });
+                }
+
+                // Populate PFAS filter with individual compounds only, default to PFBS
+                if (pfasFilter) {
+                    pfasFilter.innerHTML = '<option value="all">All PFAS Compounds</option>';
+                    
+                    // Define all PFAS compounds exactly as shown in research charts
+                    const researchCompounds = [
+                        // Sulfonic Acids (PFSA)
+                        { compound: 'PFBS', fullName: 'PFBS - Perfluorobutanesulfonic acid' },
+                        { compound: 'PFPeS', fullName: 'PFPeS - Perfluoropentanesulfonic acid' },
+                        { compound: 'PFHxS', fullName: 'PFHxS - Perfluorohexanesulfonic acid' },
+                        { compound: 'PFHpS', fullName: 'PFHpS - Perfluoroheptanesulfonic acid' },
+                        { compound: 'PFOS', fullName: 'PFOS - Perfluorooctanesulfonic acid' },
+                        
+                        // Other compounds
+                        { compound: 'PFMOPrA', fullName: 'PFMOPrA - Perfluoro-3-methoxypropanoic acid' },
+                        { compound: 'PFMOBA', fullName: 'PFMOBA - Perfluoro-4-methoxybutanoic acid' },
+                        { compound: '4:2 FTS', fullName: '4:2 FTS - 4:2 Fluorotelomer sulfonate' },
+                        { compound: 'GenX', fullName: 'GenX - PFOA replacement compound' },
+                        { compound: '6:2 FTS', fullName: '6:2 FTS - 6:2 Fluorotelomer sulfonate' },
+                        
+                        // Carboxylic Acids (PFCA)
+                        { compound: 'PFBA', fullName: 'PFBA - Perfluorobutanoic acid' },
+                        { compound: 'PFPeA', fullName: 'PFPeA - Perfluoropentanoic acid' },
+                        { compound: 'PFHxA', fullName: 'PFHxA - Perfluorohexanoic acid' },
+                        { compound: 'PFHpA', fullName: 'PFHpA - Perfluoroheptanoic acid' },
+                        { compound: 'PFOA', fullName: 'PFOA - Perfluorooctanoic acid' },
+                        { compound: 'PFNA', fullName: 'PFNA - Perfluorononanoic acid' },
+                        { compound: 'PFDA', fullName: 'PFDA - Perfluorodecanoic acid' }
+                    ];
+
+                    // Add each research compound
+                    researchCompounds.forEach(item => {
+                        const option = document.createElement('option');
+                        option.value = item.compound;
+                        option.textContent = item.fullName;
+                        pfasFilter.appendChild(option);
+                    });
+
+                    // Add any additional compounds found in actual data that aren't in the research list
+                    const additionalCompounds = pfasCompounds.filter(compound => 
+                        !researchCompounds.some(research => 
+                            compound.toUpperCase().includes(research.compound.toUpperCase()) ||
+                            research.compound.toUpperCase().includes(compound.toUpperCase())
+                        )
+                    );
+
+                    if (additionalCompounds.length > 0) {
+                        additionalCompounds.sort().forEach(pfas => {
+                            const option = document.createElement('option');
+                            option.value = pfas;
+                            option.textContent = pfas;
+                            pfasFilter.appendChild(option);
+                        });
+                    }
+
+                    // Set default selection to PFBS
+                    pfasFilter.value = 'PFBS';
+                }
+
+                // Update legend
+                updateChartLegend();
+
+            } catch (error) {
+                console.error('Error in populateChartFilters:', error);
+            }
+        }
+
+        // Update legend panel for chart
+        function updateChartLegend(membranes) {
+            const legendItems = document.getElementById('legendItems');
+
+            if (!legendItems) {
+                return;
+            }
+
+            legendItems.innerHTML = '';
+
+            // Always show Commercial and Non-commercial Membranes legend
+            const legendData = [
+                { type: 'Commercial Membranes', filled: true },
+                { type: 'Non-commercial Membranes', filled: false }
+            ];
+
+            legendData.forEach(item => {
+                const legendItem = document.createElement('div');
+                legendItem.className = 'legend-item';
+
+                const colorBox = document.createElement('div');
+                colorBox.className = 'legend-color';
+                if (item.filled) {
+                    colorBox.classList.add('filled');
+                    colorBox.style.backgroundColor = '#1f77b4';
+                    colorBox.style.borderColor = '#1f77b4';
+                } else {
+                    colorBox.classList.add('hollow');
+                    colorBox.style.backgroundColor = 'white';
+                    colorBox.style.borderColor = '#1f77b4';
+                }
+
+                const label = document.createElement('span');
+                label.textContent = item.type;
+
+                legendItem.appendChild(colorBox);
+                legendItem.appendChild(label);
+                legendItems.appendChild(legendItem);
+            });
+        }
+
+        // Update statistics
+        function updateStats() {
+            try {
+                if (!filteredData || !Array.isArray(filteredData) || filteredData.length === 0) {
+                    console.log('No filtered data for stats');
+                    return;
+                }
+
+                const totalPointsEl = document.getElementById('totalPoints');
+                const avgRemovalEl = document.getElementById('avgRemoval');
+                const avgSelectivityEl = document.getElementById('avgSelectivity');
+                const uniqueMembranesEl = document.getElementById('uniqueMembranes');
+
+                if (totalPointsEl) {
+                    totalPointsEl.textContent = filteredData.length;
+                }
+
+                if (avgRemovalEl) {
+                    const avgRemoval = filteredData.reduce((sum, d) => sum + (parseFloat(d.removal_rate) || 0), 0) / filteredData.length;
+                    avgRemovalEl.textContent = avgRemoval.toFixed(1) + '%';
+                }
+
+                if (avgSelectivityEl) {
+                    // Calculate average for current Y-axis
+                    const yAxisSelect = document.getElementById('yAxisSelect');
+                    const yAxis = yAxisSelect ? yAxisSelect.value : 'removal_rate';
+                    const avgValue = filteredData.reduce((sum, d) => sum + (parseFloat(d[yAxis]) || 0), 0) / filteredData.length;
+                    avgSelectivityEl.textContent = avgValue.toFixed(1);
+                }
+
+                if (uniqueMembranesEl) {
+                    const uniqueMembranes = new Set(filteredData.map(d => d.membrane)).size;
+                    uniqueMembranesEl.textContent = uniqueMembranes;
+                }
+            } catch (error) {
+                console.error('Error updating stats:', error);
+            }
+        }
+
+        // Apply filters
+        function applyFilters() {
+            try {
+                const membraneFilter = document.getElementById('membraneFilter');
+                const pfasFilter = document.getElementById('pfasFilter');
+                const chainLengthFilter = document.getElementById('chainLengthFilter');
+                const functionalGroupFilter = document.getElementById('functionalGroupFilter');
+                const minRemovalFilter = document.getElementById('minRemovalFilter');
+
+                const membraneValue = membraneFilter ? membraneFilter.value : 'all';
+                const pfasValue = pfasFilter ? pfasFilter.value : 'all';
+                const chainLengthValue = chainLengthFilter ? chainLengthFilter.value : 'all';
+                const functionalGroupValue = functionalGroupFilter ? functionalGroupFilter.value : 'all';
+                const minRemoval = minRemovalFilter ? parseFloat(minRemovalFilter.value) : 0;
+
+                console.log('Applying filters:', { 
+                    membraneValue, pfasValue, chainLengthValue, functionalGroupValue, minRemoval 
+                });
+
+                // Define compound categories based exactly on research charts
+                const compoundCategories = {
+                    'PFSA': ['PFBS', 'PFPeS', 'PFHxS', 'PFHpS', 'PFOS'],
+                    'PFCA': ['PFBA', 'PFPeA', 'PFHxA', 'PFHpA', 'PFOA', 'PFNA', 'PFDA'],
+                    'OTHER': ['PFMOPrA', 'PFMOBA', '4:2 FTS', 'GenX', '6:2 FTS']
+                };
+
+                // Define chain lengths based on carbon count
+                const shortChainCompounds = [
+                    'PFBS', 'PFPeS', 'PFHxS',  // C4-C6 sulfonic acids
+                    'PFBA', 'PFPeA', 'PFHxA',  // C4-C6 carboxylic acids
+                    '4:2 FTS'                   // Short-chain telomer
+                ];
+                
+                const longChainCompounds = [
+                    'PFHpS', 'PFOS',           // C7+ sulfonic acids
+                    'PFHpA', 'PFOA', 'PFNA', 'PFDA', // C7+ carboxylic acids
+                    '6:2 FTS'                  // Long-chain telomer
+                ];
+
+                // Define functional groups based on chemical structure
+                const sulfonicAcids = ['PFBS', 'PFPeS', 'PFHxS', 'PFHpS', 'PFOS', '4:2 FTS', '6:2 FTS'];
+                const carboxylicAcids = ['PFBA', 'PFPeA', 'PFHxA', 'PFHpA', 'PFOA', 'PFNA', 'PFDA'];
+                const otherGroups = ['PFMOPrA', 'PFMOBA', 'GenX'];
+
+                filteredData = allData.filter(item => {
+                    const matchesMembrane = membraneValue === 'all' || item.membrane === membraneValue;
+                    
+                    // PFAS compound filtering logic (simplified for individual compounds only)
+                    let matchesPfas = true;
+                    if (pfasValue !== 'all') {
+                        // Direct compound matching - no more category filtering
+                        matchesPfas = item.pfas && (
+                            item.pfas.toUpperCase().includes(pfasValue.toUpperCase()) ||
+                            item.pfas === pfasValue
+                        );
+                    }
+
+                    // Chain length filtering
+                    let matchesChainLength = true;
+                    if (chainLengthValue !== 'all') {
+                        if (chainLengthValue === 'short') {
+                            matchesChainLength = shortChainCompounds.some(compound => 
+                                item.pfas && item.pfas.toUpperCase().includes(compound.toUpperCase())
+                            );
+                        } else if (chainLengthValue === 'long') {
+                            matchesChainLength = longChainCompounds.some(compound => 
+                                item.pfas && item.pfas.toUpperCase().includes(compound.toUpperCase())
+                            );
+                        }
+                    }
+
+                    // Functional group filtering
+                    let matchesFunctionalGroup = true;
+                    if (functionalGroupValue !== 'all') {
+                        if (functionalGroupValue === 'sulfonic') {
+                            matchesFunctionalGroup = sulfonicAcids.some(compound => 
+                                item.pfas && item.pfas.toUpperCase().includes(compound.toUpperCase())
+                            );
+                        } else if (functionalGroupValue === 'carboxylic') {
+                            matchesFunctionalGroup = carboxylicAcids.some(compound => 
+                                item.pfas && item.pfas.toUpperCase().includes(compound.toUpperCase())
+                            );
+                        } else if (functionalGroupValue === 'other') {
+                            matchesFunctionalGroup = otherGroups.some(compound => 
+                                item.pfas && item.pfas.toUpperCase().includes(compound.toUpperCase())
+                            );
+                        }
+                    }
+
+                    const matchesRemoval = parseFloat(item.removal_rate || 0) >= minRemoval;
+
+                    return matchesMembrane && matchesPfas && matchesChainLength && 
+                           matchesFunctionalGroup && matchesRemoval;
+                });
+
+                console.log('Filtered data count:', filteredData.length);
+                console.log('Compounds in filtered data:', [...new Set(filteredData.map(item => item.pfas))]);
+                
+                updateStats();
+                updateChart();
+            } catch (error) {
+                console.error('Error applying filters:', error);
+            }
+        }
+
+        // Create Chart.js chart (optimized)
+        function createChart() {
+            const ctx = document.getElementById('membraneChart')?.getContext('2d');
+
+            if (!ctx) {
+                console.error('Canvas element not found');
+                return;
+            }
+
+            if (typeof Chart === 'undefined') {
+                console.error('Chart.js not loaded');
+                return;
+            }
+
+            // Check if zoom plugin is loaded
+            console.log('Available Chart plugins:', Chart.registry.plugins);
+
+            if (chart) {
+                chart.destroy();
+            }
+
+            const xAxis = document.getElementById('xAxisSelect')?.value || 'water_permeance';
+            const yAxis = document.getElementById('yAxisSelect')?.value || 'water_solute_selectivity';
+
+            // Safety check for data
+            if (!filteredData || filteredData.length === 0) {
+                return;
+            }
+
+            const datasets = generateDatasets(xAxis, yAxis);
+
+            const config = {
+                type: 'scatter',
+                data: { datasets },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        intersect: false
+                    },
+                    onHover: (event, activeElements) => {
+                        event.native.target.style.cursor = activeElements.length > 0 ? 'pointer' : 'grab';
+                    },
+                    plugins: {
+                        zoom: {
+                            limits: {
+                                x: {min: 1, max: 100},
+                                y: {min: 0.01, max: 100}
+                            },
+                            pan: {
+                                enabled: true,
+                                mode: 'xy'
+                            },
+                            zoom: {
+                                wheel: {
+                                    enabled: true,
+                                    speed: 0.1
+                                },
+                                pinch: {
+                                    enabled: true
+                                },
+                                mode: 'xy'
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: `${fieldLabels[yAxis]} vs ${fieldLabels[xAxis]}`,
+                            font: { size: 18, weight: 'bold' },
+                            color: '#1464b4'
+                        },
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            enabled: true,
+                            backgroundColor: function(tooltipModel) {
+                                // Check if this is a commercial membrane
+                                if (tooltipModel.dataPoints && tooltipModel.dataPoints.length > 0) {
+                                    const point = tooltipModel.dataPoints[0];
+                                    const dataset = tooltipModel.chart.data.datasets[point.datasetIndex];
+                                    if (dataset && dataset.label === 'Commercial') {
+                                        return '#1f77b4'; // Blue background for commercial
+                                    }
+                                }
+                                return 'rgba(255, 255, 255, 0.95)'; // White background for non-commercial
+                            },
+                            titleColor: function(tooltipModel) {
+                                // Check if this is a commercial membrane
+                                if (tooltipModel.dataPoints && tooltipModel.dataPoints.length > 0) {
+                                    const point = tooltipModel.dataPoints[0];
+                                    const dataset = tooltipModel.chart.data.datasets[point.datasetIndex];
+                                    if (dataset && dataset.label === 'Commercial') {
+                                        return '#ffffff'; // White text for commercial
+                                    }
+                                }
+                                return '#333333'; // Black text for non-commercial
+                            },
+                            bodyColor: function(tooltipModel) {
+                                // Check if this is a commercial membrane
+                                if (tooltipModel.dataPoints && tooltipModel.dataPoints.length > 0) {
+                                    const point = tooltipModel.dataPoints[0];
+                                    const dataset = tooltipModel.chart.data.datasets[point.datasetIndex];
+                                    if (dataset && dataset.label === 'Commercial') {
+                                        return '#ffffff'; // White text for commercial
+                                    }
+                                }
+                                return '#333333'; // Black text for non-commercial
+                            },
+                            borderColor: function(tooltipModel) {
+                                // Blue border for both, but darker for commercial
+                                if (tooltipModel.dataPoints && tooltipModel.dataPoints.length > 0) {
+                                    const point = tooltipModel.dataPoints[0];
+                                    const dataset = tooltipModel.chart.data.datasets[point.datasetIndex];
+                                    if (dataset && dataset.label === 'Commercial') {
+                                        return '#0d47a1'; // Darker blue border for commercial
+                                    }
+                                }
+                                return '#1f77b4'; // Regular blue border for non-commercial
+                            },
+                            borderWidth: 2,
+                            cornerRadius: 8,
+                            displayColors: false,
+                            mode: 'nearest',
+                            intersect: true,
+                            callbacks: {
+                                title: function(context) {
+                                    if (context[0].raw.item) {
+                                        const item = context[0].raw.item;
+                                        return item.membrane_type === 'Commercial' ? 'Commercial Membrane' : 'Non-commercial Membrane';
+                                    }
+                                    return 'Upper Bound';
+                                },
+                                label: function(context) {
+                                    if (context.raw.item) {
+                                        const item = context.raw.item;
+                                        return [
+                                            `Source: ${item.source}`,
+                                            `Material: ${item.material}`,
+                                            `Water Permanence: ${context.parsed.x.toFixed(2)} L m⁻² h⁻¹ bar⁻¹`,
+                                            `Selectivity (A/B): ${context.parsed.y.toFixed(1)}`,
+                                            `Operating Pressure: ${item.operating_pressure} bar`,
+                                            `Temperature: ${item.temperature}°C`,
+                                            `pH: ${item.ph_value}`,
+                                            `Salt Concentration: ${item.salt_concentration} mg/L`,
+                                            item.doi ? `Click to access: ${item.doi}` : ''
+                                        ].filter(Boolean);
+                                    }
+                                    return `Upper Bound: ${context.parsed.y.toFixed(2)}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            type: 'logarithmic',
+                            position: 'bottom',
+                            title: {
+                                display: true,
+                                text: 'Water permanence, A (L m⁻² h⁻¹ bar⁻¹)',
+                                font: { size: 16, weight: 'bold' },
+                                color: '#333'
+                            },
+                            min: 1,
+                            max: 100,
+                            ticks: {
+                                callback: function(value) {
+                                    if (value === 1) return '10⁰';
+                                    if (value === 10) return '10¹';
+                                    if (value === 100) return '10²';
+                                    return '';
+                                },
+                                font: { size: 14 },
+                                color: '#333',
+                                major: {
+                                    enabled: true
+                                }
+                            },
+                            grid: {
+                                display: true,
+                                drawOnChartArea: true,
+                                color: function(context) {
+                                    // Only show major grid lines at powers of 10
+                                    const value = context.tick.value;
+                                    if (value === 1 || value === 10 || value === 100) {
+                                        return 'rgba(0,0,0,0.2)';
+                                    }
+                                    return 'transparent';
+                                },
+                                lineWidth: 1
+                            }
+                        },
+                        y: {
+                            type: 'logarithmic',
+                            position: 'left',
+                            title: {
+                                display: true,
+                                text: 'Water-Solute selectivity, A/B (bar)',
+                                font: { size: 16, weight: 'bold' },
+                                color: '#333'
+                            },
+                            min: 0.01,
+                            max: 100,
+                            ticks: {
+                                callback: function(value) {
+                                    if (value === 0.01) return '10⁻²';
+                                    if (value === 0.1) return '10⁻¹';
+                                    if (value === 1) return '10⁰';
+                                    if (value === 10) return '10¹';
+                                    if (value === 100) return '10²';
+                                    return '';
+                                },
+                                font: { size: 14 },
+                                color: '#333',
+                                major: {
+                                    enabled: true
+                                }
+                            },
+                            grid: {
+                                display: true,
+                                drawOnChartArea: true,
+                                color: function(context) {
+                                    // Only show major grid lines at powers of 10
+                                    const value = context.tick.value;
+                                    if (value === 0.01 || value === 0.1 || value === 1 || value === 10 || value === 100) {
+                                        return 'rgba(0,0,0,0.2)';
+                                    }
+                                    return 'transparent';
+                                },
+                                lineWidth: 1
+                            }
+                        }
+                    },
+                    onClick: (event, elements) => {
+                        if (elements.length > 0) {
+                            const dataIndex = elements[0].index;
+                            const datasetIndex = elements[0].datasetIndex;
+                            const dataset = datasets[datasetIndex];
+                            if (dataset && dataset.data[dataIndex] && dataset.data[dataIndex].item) {
+                                const item = dataset.data[dataIndex].item;
+
+                                if (item.doi) {
+                                    window.open(item.doi.startsWith('http') ? item.doi : `https://doi.org/${item.doi}`, '_blank');
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+
+            try {
+                chart = new Chart(ctx, config);
+
+                // Add reset zoom button functionality
+                const resetButton = document.getElementById('resetZoom');
+                if (resetButton) {
+                    resetButton.addEventListener('click', () => {
+                        if (chart) {
+                            chart.resetZoom();
+                        }
+                    });
+                }
+
+                // Enhanced pan implementation that works with zoom
+                let isPanning = false;
+                let lastPanPoint = null;
+
+                chart.canvas.addEventListener('mousedown', (e) => {
+                    // Only start panning if not clicking on a data point
+                    const points = chart.getElementsAtEventForMode(e, 'nearest', { intersect: true }, true);
+                    if (points.length === 0) {
+                        isPanning = true;
+                        lastPanPoint = { x: e.clientX, y: e.clientY };
+                        chart.canvas.style.cursor = 'grabbing';
+                        e.preventDefault();
+                    }
+                });
+
+                chart.canvas.addEventListener('mousemove', (e) => {
+                    if (isPanning && lastPanPoint) {
+                        const deltaX = e.clientX - lastPanPoint.x;
+                        const deltaY = e.clientY - lastPanPoint.y;
+
+                        // Use the zoom plugin's pan method
+                        chart.pan({ x: deltaX, y: deltaY });
+
+                        lastPanPoint = { x: e.clientX, y: e.clientY };
+                        e.preventDefault();
+                    }
+                });
+
+                const stopPanning = () => {
+                    if (isPanning) {
+                        isPanning = false;
+                        lastPanPoint = null;
+                        chart.canvas.style.cursor = 'grab';
+                    }
+                };
+
+                chart.canvas.addEventListener('mouseup', stopPanning);
+                chart.canvas.addEventListener('mouseleave', stopPanning);
+
+                // Set initial cursor
+                chart.canvas.style.cursor = 'grab';
+
+            } catch (error) {
+                console.error('Error creating chart:', error);
+            }
+        }
+
+        // Update chart efficiently without recreation
+        function updateChart() {
+            if (!chart || !chart.data) return;
+
+            const xAxis = document.getElementById('xAxisSelect')?.value || 'water_permeance';
+            const yAxis = document.getElementById('yAxisSelect')?.value || 'water_solute_selectivity';
+
+            // Generate new datasets only if needed
+            const newDatasets = generateDatasets(xAxis, yAxis);
+
+            // Update chart data
+            chart.data.datasets = newDatasets;
+            chart.update('none'); // No animation for better performance
+        }
+
+        // Generate datasets (extracted for reuse)
+        function generateDatasets(xAxis, yAxis) {
+            if (!filteredData || filteredData.length === 0) return [];
+
+            // Group data by membrane commercialization type
+            const commercialData = filteredData.filter(item => item.membrane_type === 'Commercial');
+            const nonCommercialData = filteredData.filter(item => item.membrane_type === 'Non-commercial');
+
+            const datasets = [];
+
+            // Commercial membranes (filled blue circles)
+            if (commercialData.length > 0) {
+                datasets.push({
+                    label: 'Commercial',
+                    data: commercialData.map(item => ({
+                        x: parseFloat(item[xAxis]) || 0,
+                        y: parseFloat(item[yAxis]) || 0,
+                        item: item
+                    })),
+                    backgroundColor: '#1f77b4', // Solid blue fill
+                    borderColor: '#1f77b4',
+                    borderWidth: 2,
+                    pointRadius: 6,
+                    pointHoverRadius: 8
+                });
+            }
+
+            // Non-commercial membranes (hollow blue circles)
+            if (nonCommercialData.length > 0) {
+                datasets.push({
+                    label: 'Non-commercial',
+                    data: nonCommercialData.map(item => ({
+                        x: parseFloat(item[xAxis]) || 0,
+                        y: parseFloat(item[yAxis]) || 0,
+                        item: item
+                    })),
+                    backgroundColor: 'rgba(255, 255, 255, 1)', // White fill (hollow)
+                    borderColor: '#1f77b4', // Blue border
+                    borderWidth: 2,
+                    pointRadius: 6,
+                    pointHoverRadius: 8
+                });
+            }
+
+            // Add upper bound line if showing the correct axes
+            if (xAxis === 'water_permeance' && yAxis === 'water_solute_selectivity') {
+                const upperBoundData = [];
+                for (let logA = -1.0; logA <= 2.5; logA += 0.1) {
+                    const A = Math.pow(10, logA);
+                    const selectivity = 1110 * Math.pow(A, -1.76);
+                    upperBoundData.push({ x: A, y: selectivity });
+                }
+
+                datasets.push({
+                    label: 'Upper Bound',
+                    data: upperBoundData,
+                    type: 'line',
+                    backgroundColor: 'transparent',
+                    borderColor: '#1464b4',
+                    borderWidth: 3,
+                    pointRadius: 0,
+                    pointHoverRadius: 0,
+                    tension: 0.1,
+                    fill: false
+                });
+            }
+
+            return datasets;
+        }
+
+        // Setup event listeners with safety checks
+        function setupEventListeners() {
+            const xAxisSelect = document.getElementById('xAxisSelect');
+            const yAxisSelect = document.getElementById('yAxisSelect');
+            const logScaleToggle = document.getElementById('logScaleToggle');
+            const membraneFilter = document.getElementById('membraneFilter');
+            const pfasFilter = document.getElementById('pfasFilter');
+            const chainLengthFilter = document.getElementById('chainLengthFilter');
+            const functionalGroupFilter = document.getElementById('functionalGroupFilter');
+            const minRemovalFilter = document.getElementById('minRemovalFilter');
+            const minRemovalValue = document.getElementById('minRemovalValue');
+
+            if (xAxisSelect) {
+                xAxisSelect.addEventListener('change', updateChart);
+            }
+
+            if (yAxisSelect) {
+                yAxisSelect.addEventListener('change', updateChart);
+            }
+
+            if (logScaleToggle) {
+                logScaleToggle.addEventListener('change', updateChart);
+            }
+
+            if (membraneFilter) {
+                membraneFilter.addEventListener('change', applyFilters);
+            }
+
+            if (pfasFilter) {
+                pfasFilter.addEventListener('change', applyFilters);
+            }
+
+            if (chainLengthFilter) {
+                chainLengthFilter.addEventListener('change', applyFilters);
+            }
+
+            if (functionalGroupFilter) {
+                functionalGroupFilter.addEventListener('change', applyFilters);
+            }
+
+            if (minRemovalFilter && minRemovalValue) {
+                minRemovalFilter.addEventListener('input', function() {
+                    minRemovalValue.textContent = this.value + '%';
+                    applyFilters();
+                });
+            }
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            // Check if Chart.js loaded
+            if (typeof Chart === 'undefined') {
+                document.getElementById('errorMessage').classList.add('show');
+                document.getElementById('errorMessage').innerHTML =
+                    '<strong>Chart.js failed to load.</strong><br>Please check your internet connection and refresh the page.';
+                return;
+            }
+
+            // Try to register zoom plugin if available
+            try {
+                if (window.ChartZoom) {
+                    Chart.register(window.ChartZoom);
+                    console.log('✅ Zoom plugin registered successfully');
+                } else {
+                    console.warn('⚠️ Zoom plugin not found - zoom functionality disabled');
+                }
+            } catch (error) {
+                console.warn('⚠️ Could not register zoom plugin:', error);
+            }
+
+            fetchData();
+        });
+    </script>
+
+    <!-- Bootstrap JS (needed for navbar dropdowns) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+
+    <!-- Include the script that handles navbar and authentication -->
+    <script src="js/script.js"></script>
+
+    <!-- Include HTML -->
+    <script src="js/include_html.js"></script>
+
+    <!-- Navbar Javascript -->
+    <script src="js/navbarscript.js"></script>
+</body>
+</html>

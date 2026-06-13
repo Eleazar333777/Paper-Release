@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cetara - CetaraGPT</title>
+    <link rel="icon" type="image/x-icon" href="https://github.com/MSan789/Cetara/raw/23dd47fc225c284ed36c0eb1fa87aa61765c2da2/cetara.ico">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-blue: #0066ff;
+            --secondary-blue: #0052cc;
+            --accent-cyan: #00d4ff;
+            --dark-bg: #0a0e1a;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --text-primary: #ffffff;
+            --text-secondary: #b0c4de;
+            --gradient-primary: linear-gradient(135deg, #0066ff 0%, #00d4ff 100%);
+            --gradient-hero: linear-gradient(135deg, #0a0e1a 0%, #1a237e 50%, #0066ff 100%);
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--dark-bg);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+        .loading {
+            opacity: 0;
+            animation: fadeInUp 1s ease-out forwards;
+        }
+
+        .input-group {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05);
+            padding: 1rem;
+            width: 100%;
+        }
+
+        .input-container {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 25px;
+            padding: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+
+        @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        }
+
+
+        /* Main Container */
+        .main-container {
+            padding: 8rem 2rem 2rem;
+            min-height: 100vh;
+        }
+
+        .chat-wrapper {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        /* Chat Container */
+        .chat-container-wrapper {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .chat-header {
+            background: var(--gradient-primary);
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+        }
+
+        .chat-header h2 {
+            margin: 0;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .header-buttons {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .btn-clear, .btn-download {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .btn-clear:hover, .btn-download:hover {
+            background: rgba(255, 255, 255, 0.3);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .chat-dropdown {
+            position: relative;
+        }
+
+        .chat-dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            padding: 0.5rem 0;
+            display: none;
+            z-index: 1000;
+            min-width: 200px;
+        }
+
+        .chat-dropdown-menu.show {
+            display: block;
+        }
+
+        .chat-dropdown-item {
+            color: var(--text-primary);
+            padding: 0.75rem 1.5rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .chat-dropdown-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--accent-cyan);
+        }
+
+        /* Chat Content */
+        #chat-container-ui {
+            background: transparent;
+            height: 65vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        #chat-log-ui {
+            flex: 1;
+            padding: 1.5rem;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+        }
+
+        #chat-log-ui::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #chat-log-ui::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        #chat-log-ui::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 3px;
+        }
+
+        #chat-log-ui::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        .message {
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+            animation: fadeInUp 0.3s ease;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.user {
+            text-align: right;
+        }
+
+        .message .bubble {
+            display: inline-block;
+            padding: 1rem 1.25rem;
+            border-radius: 20px;
+            max-width: 85%;
+            word-wrap: break-word;
+            position: relative;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .message.user .bubble {
+            background: var(--gradient-primary);
+            color: white;
+            border-bottom-right-radius: 5px;
+        }
+
+        .message.bot .bubble {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            color: var(--text-primary);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-bottom-left-radius: 5px;
+        }
+
+        /* Input Area */
+        .input-group {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05);
+            padding: 1rem;
+        }
+
+        .input-container {
+            display: flex;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 25px;
+            padding: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .input-container:focus-within {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.2);
+        }
+
+        #chat-input-ui {
+            border: none;
+            background: transparent;
+            flex: 1;
+            padding: 0.75rem 1rem;
+            font-size: 1rem;
+            outline: none;
+            color: var(--text-primary);
+        }
+
+        #chat-input-ui::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .btn-send {
+            background: var(--gradient-primary);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 10px rgba(0, 102, 255, 0.3);
+        }
+
+        .btn-send:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 102, 255, 0.4);
+        }
+
+        .btn-send:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* Neural Network Animation */
+        .response-animation {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem 2rem;
+            text-align: center;
+        }
+
+        .neural-container {
+            position: relative;
+            width: 150px;
+            height: 150px;
+            margin-bottom: 1.5rem;
+        }
+
+        .neural-core {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 50px;
+            height: 50px;
+            background: var(--gradient-primary);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            animation: coreGlow 2.2s ease-in-out infinite;
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.4);
+        }
+
+        .neural-node {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: var(--accent-cyan);
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.6);
+            animation: nodeFlicker 2.7s ease-in-out infinite;
+        }
+
+        .neural-node:nth-child(2) { top: 15px; left: 40px; animation-delay: -0.2s; }
+        .neural-node:nth-child(3) { top: 30px; right: 25px; animation-delay: -0.7s; }
+        .neural-node:nth-child(4) { top: 60px; left: 15px; animation-delay: -1.2s; }
+        .neural-node:nth-child(5) { top: 90px; right: 20px; animation-delay: -1.7s; }
+        .neural-node:nth-child(6) { bottom: 30px; left: 35px; animation-delay: -2.2s; }
+
+        .thinking-status {
+            color: var(--accent-cyan);
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            animation: statusGlow 3.2s ease-in-out infinite;
+        }
+
+        .thinking-subtitle {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        @keyframes coreGlow {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.1); }
+        }
+
+        @keyframes nodeFlicker {
+            0%, 100% { opacity: 0.6; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+
+        @keyframes statusGlow {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        /* Info Text */
+        .info-text {
+            text-align: center;
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.5;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .info-text i {
+            color: var(--accent-cyan);
+            margin-right: 0.5rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .main-container {
+                padding: 6rem 1rem 1rem;
+            }
+
+            .chat-header {
+                padding: 1rem;
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .header-buttons {
+                flex-direction: row;
+                gap: 0.5rem;
+            }
+
+            #chat-container-ui {
+                height: 60vh;
+            }
+
+            .message .bubble {
+                max-width: 95%;
+                padding: 0.75rem 1rem;
+            }
+
+            #chat-log-ui {
+                padding: 1rem;
+            }
+
+            .info-text {
+                margin: 1rem;
+                padding: 1rem;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+  <div w3-include-html="parts/background.html"></div>
+  <div w3-include-html="parts/navbar.html"></div>
+
+    <!-- Main Content -->
+    <div class="main-container loading">
+        <div class="chat-wrapper">
+            <div class="chat-container-wrapper">
+                <div class="chat-header">
+                    <h2>CetaraGPT--Experimental Guidelines</h2>
+                    <div class="header-buttons">
+                        <div class="chat-dropdown">
+                            <button class="btn-download" id="downloadToggle">
+                                <i class="bi bi-download"></i> Download Chat
+                            </button>
+                            <div class="chat-dropdown-menu" id="downloadMenu">
+                                <a class="chat-dropdown-item" href="#" id="download-html">
+                                    <i class="bi bi-file-earmark-code"></i>HTML
+                                </a>
+                                <a class="chat-dropdown-item" href="#" id="download-pdf">
+                                    <i class="bi bi-file-earmark-pdf"></i>PDF
+                                </a>
+                                <a class="chat-dropdown-item" href="#" id="download-word">
+                                    <i class="bi bi-file-earmark-word"></i>Word
+                                </a>
+                                <a class="chat-dropdown-item" href="#" id="download-markdown">
+                                    <i class="bi bi-file-earmark-text"></i>Markdown
+                                </a>
+                            </div>
+                        </div>
+                        <button class="btn-clear" id="clear-history-btn">
+                            <i class="bi bi-trash3"></i> Clear Chat
+                        </button>
+                    </div>
+                </div>
+                <div id="chat-container-ui">
+                    <div id="chat-log-ui"></div>
+                    <div class="input-group">
+                        <div class="input-container">
+                            <input
+                                id="chat-input-ui"
+                                type="text"
+                                placeholder="Ask me anything about PFAS..."
+                                autocomplete="off"
+                            />
+                            <button class="btn-send" id="send-btn">
+                                <i class="bi bi-send-fill"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-text">
+                <i class="bi bi-info-circle"></i>
+                <strong>Important Notes:</strong> CetaraGPT is experimental and can make mistakes. Please word your question carefully.
+                <br>For best answers, clear the chat history before talking about a new PFAS subject.
+                <br>Please allow 20-30 seconds for the chatbot to respond.
+                <br>
+                Occasionally, under high load, a response may take up to a minute to be returned.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Logout function for CetaraGPT - also clears chat history
+        function logout() {
+            localStorage.removeItem("token");
+            localStorage.removeItem('chatHistory');
+            updateNavbarLinks();
+            window.location.href = "login.html";
+        }
+
+        // Chat dropdown functionality
+        const downloadToggle = document.getElementById('downloadToggle');
+        const downloadMenu = document.getElementById('downloadMenu');
+
+        downloadToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            downloadMenu.classList.toggle('show');
+        });
+
+        document.addEventListener('click', () => {
+            downloadMenu.classList.remove('show');
+        });
+
+        // Chat functionality
+        const log = document.getElementById('chat-log-ui');
+        const input = document.getElementById('chat-input-ui');
+        const clearBtn = document.getElementById('clear-history-btn');
+        const downloadHtmlBtn = document.getElementById('download-html');
+        const downloadPdfBtn = document.getElementById('download-pdf');
+        const downloadWordBtn = document.getElementById('download-word');
+        const downloadMarkdownBtn = document.getElementById('download-markdown');
+        const sendBtn = document.getElementById('send-btn');
+        let chatHistory = JSON.parse(localStorage.getItem('chatHistory') || '[]');
+        let isProcessing = false;
+
+        // Thinking messages
+        const thinkingMessages = [
+            { status: "Initializing neural network...", subtitle: "Connecting to PFAS knowledge base" },
+            { status: "Processing membrane data...", subtitle: "Analyzing filtration parameters" },
+            { status: "Computing trade-off analysis...", subtitle: "Evaluating performance metrics" },
+            { status: "Synthesizing research findings...", subtitle: "Cross-referencing studies" },
+            { status: "Optimizing response structure...", subtitle: "Organizing insights" },
+            { status: "Calculating selectivity ratios...", subtitle: "Processing experimental data" },
+            { status: "Finalizing recommendations...", subtitle: "Preparing comprehensive analysis" }
+        ];
+
+        let currentMessageIndex = 0;
+        let messageInterval = null;
+
+        // Create neural network animation
+        function createResponseAnimation() {
+            return `
+                <div class="response-animation">
+                    <div class="neural-container">
+                        <div class="neural-core"></div>
+                        <div class="neural-node"></div>
+                        <div class="neural-node"></div>
+                        <div class="neural-node"></div>
+                        <div class="neural-node"></div>
+                        <div class="neural-node"></div>
+                    </div>
+                    <div class="thinking-status" id="thinking-status">Booting AI systems...</div>
+                    <div class="thinking-subtitle" id="thinking-subtitle">Preparing neural pathways</div>
+                </div>
+            `;
+        }
+
+        function updateThinkingMessage() {
+            const statusElement = document.getElementById('thinking-status');
+            const subtitleElement = document.getElementById('thinking-subtitle');
+
+            if (statusElement && subtitleElement) {
+                const message = thinkingMessages[currentMessageIndex];
+                statusElement.textContent = message.status;
+                subtitleElement.textContent = message.subtitle;
+                currentMessageIndex = (currentMessageIndex + 1) % thinkingMessages.length;
+            }
+        }
+
+        function startThinkingAnimation(botBubbleDiv) {
+            botBubbleDiv.innerHTML = `<div class="bubble">${createResponseAnimation()}</div>`;
+            currentMessageIndex = 0;
+            updateThinkingMessage();
+            messageInterval = setInterval(updateThinkingMessage, 2700);
+            log.scrollTop = log.scrollHeight;
+        }
+
+        function stopThinkingAnimation() {
+            if (messageInterval) {
+                clearInterval(messageInterval);
+                messageInterval = null;
+            }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function appendUser(text) {
+            chatHistory.push({ sender: 'user', text });
+            localStorage.setItem('chatHistory', JSON.stringify(chatHistory));
+            const d = document.createElement('div');
+            d.classList.add('message', 'user');
+            d.innerHTML = `<div class="bubble">${escapeHtml(text)}</div>`;
+            log.appendChild(d);
+            log.scrollTop = log.scrollHeight;
+        }
+
+        function appendBot(markdown, botBubbleDiv) {
+            chatHistory.push({ sender: 'bot', text: markdown });
+            localStorage.setItem('chatHistory', JSON.stringify(chatHistory));
+            botBubbleDiv.innerHTML = `<div class="bubble">${marked.parse(markdown)}</div>`;
+            log.scrollTop = log.scrollHeight;
+        }
+
+        function renderHistory() {
+            log.innerHTML = '';
+            chatHistory.forEach(msg => {
+                const d = document.createElement('div');
+                d.classList.add('message', msg.sender);
+                if (msg.sender === 'user') {
+                    d.innerHTML = `<div class="bubble">${escapeHtml(msg.text)}</div>`;
+                } else {
+                    d.innerHTML = `<div class="bubble">${marked.parse(msg.text)}</div>`;
+                }
+                log.appendChild(d);
+            });
+            log.scrollTop = log.scrollHeight;
+        }
+
+        // Download functions (unchanged)
+        function downloadChatAsHTML() {
+            if (chatHistory.length === 0) {
+                alert('No chat history to download.');
+                return;
+            }
+
+            let htmlContent = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CetaraGPT Chat History</title>
+    <style>
+        body { font-family: 'Poppins', sans-serif; background: linear-gradient(135deg, #0a0e1a 0%, #1a237e 50%, #0066ff 100%); margin: 0; padding: 2rem; min-height: 100vh; color: white; }
+        .chat-container { max-width: 800px; margin: 0 auto; background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(20px); border-radius: 20px; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3); overflow: hidden; }
+        .chat-header { background: linear-gradient(135deg, #0066ff 0%, #00d4ff 100%); color: white; padding: 2rem; text-align: center; }
+        .chat-header h1 { margin: 0; font-size: 2rem; }
+        .chat-header p { margin: 0.5rem 0 0 0; opacity: 0.9; }
+        .chat-content { padding: 2rem; }
+        .message { margin-bottom: 1.5rem; display: flex; flex-direction: column; }
+        .message.user { align-items: flex-end; }
+        .message.bot { align-items: flex-start; }
+        .bubble { max-width: 80%; padding: 1rem 1.25rem; border-radius: 20px; word-wrap: break-word; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2); }
+        .message.user .bubble { background: linear-gradient(135deg, #0066ff 0%, #00d4ff 100%); color: white; border-bottom-right-radius: 5px; }
+        .message.bot .bubble { background: rgba(255, 255, 255, 0.1); color: white; border: 1px solid rgba(255, 255, 255, 0.2); border-bottom-left-radius: 5px; }
+        .timestamp { font-size: 0.8rem; color: #b0c4de; margin-top: 0.5rem; padding: 0 0.5rem; }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <h1>CetaraGPT Chat History</h1>
+            <p>Downloaded on ${new Date().toLocaleString()}</p>
+        </div>
+        <div class="chat-content">`;
+
+            chatHistory.forEach((msg, index) => {
+                const messageClass = msg.sender === 'user' ? 'user' : 'bot';
+                const content = msg.sender === 'user' ? escapeHtml(msg.text) : marked.parse(msg.text);
+
+                htmlContent += `
+                    <div class="message ${messageClass}">
+                        <div class="bubble">${content}</div>
+                        <div class="timestamp">Message ${index + 1}</div>
+                    </div>`;
+            });
+
+            htmlContent += `
+        </div>
+    </div>
+</body>
+</html>`;
+
+            const blob = new Blob([htmlContent], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `cetaragpt-chat-${new Date().toISOString().slice(0, 10)}.html`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function downloadChatAsPDF() {
+            if (chatHistory.length === 0) {
+                alert('No chat history to download.');
+                return;
+            }
+
+            let pdfHtml = `
+            <div style="font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px;">
+              <div style="text-align: center; margin-bottom: 30px; padding: 20px; background: #0066ff; color: white; border-radius: 10px;">
+                <h1 style="margin: 0; font-size: 24px;">CetaraGPT Chat History</h1>
+                <p style="margin: 10px 0 0 0;">Downloaded on ${new Date().toLocaleString()}</p>
+              </div>`;
+
+            chatHistory.forEach((msg, index) => {
+                if (msg.sender === 'user') {
+                    pdfHtml += `
+                      <div style="margin: 15px 0; text-align: right;">
+                        <div style="display: inline-block; background: #0066ff; color: white; padding: 12px; border-radius: 10px; max-width: 70%;">
+                          <strong>User (Message ${index + 1}):</strong><br/>
+                          ${escapeHtml(msg.text)}
+                        </div>
+                      </div>`;
+                } else {
+                    let cleanText = msg.text
+                        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                        .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                        .replace(/`([^`]+)`/g, '<code>$1</code>')
+                        .replace(/```[\s\S]*?```/g, '[Code Block]')
+                        .replace(/#{1,6}\s+(.*)/g, '<strong>$1</strong>')
+                        .replace(/^\s*[-*+]\s+(.*)$/gm, '• $1')
+                        .replace(/^\s*\d+\.\s+(.*)$/gm, '• $1');
+
+                    pdfHtml += `
+                      <div style="margin: 15px 0;">
+                        <div style="background: #f8f9fa; border-left: 4px solid #0066ff; padding: 12px; border-radius: 5px;">
+                          <strong>CetaraGPT (Message ${index + 1}):</strong><br/>
+                          ${cleanText}
+                        </div>
+                      </div>`;
+                }
+            });
+
+            pdfHtml += '</div>';
+
+            const opt = {
+                margin: 0.5,
+                filename: `cetaragpt-chat-${new Date().toISOString().slice(0, 10)}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true, allowTaint: true },
+                jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+            };
+
+            html2pdf().set(opt).from(pdfHtml).save();
+        }
+
+        function downloadChatAsWord() {
+            if (chatHistory.length === 0) {
+                alert('No chat history to download.');
+                return;
+            }
+
+            let wordContent = `
+            <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
+            <head>
+              <meta charset="utf-8">
+              <title>CetaraGPT Chat History</title>
+              <style>
+                body { font-family: Calibri, Arial, sans-serif; line-height: 1.6; margin: 40px; }
+                .header { text-align: center; margin-bottom: 30px; padding: 20px; background-color: #0066ff; color: white; border-radius: 10px; }
+                .user-message { margin: 20px 0; text-align: right; }
+                .user-bubble { display: inline-block; background-color: #0066ff; color: white; padding: 15px; border-radius: 10px; max-width: 70%; text-align: left; }
+                .bot-message { margin: 20px 0; }
+                .bot-bubble { background-color: #f8f9fa; border-left: 4px solid #0066ff; padding: 15px; border-radius: 5px; }
+                h1 { font-size: 24px; margin: 0; }
+                h2 { color: #0066ff; font-size: 16px; margin-top: 20px; }
+                .timestamp { color: #666; font-size: 12px; }
+                strong { font-weight: bold; }
+                em { font-style: italic; }
+                code { background-color: #f0f0f0; padding: 2px 4px; border-radius: 3px; font-family: 'Courier New', monospace; }
+              </style>
+            </head>
+            <body>
+              <div class="header">
+                <h1>CetaraGPT Chat History</h1>
+                <p class="timestamp">Downloaded on ${new Date().toLocaleString()}</p>
+              </div>`;
+
+            chatHistory.forEach((msg, index) => {
+                if (msg.sender === 'user') {
+                    wordContent += `
+                      <div class="user-message">
+                        <div class="user-bubble">
+                          <h2>User - Message ${index + 1}</h2>
+                          <p>${escapeHtml(msg.text)}</p>
+                        </div>
+                      </div>`;
+                } else {
+                    let cleanText = msg.text
+                        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                        .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                        .replace(/`([^`]+)`/g, '<code>$1</code>')
+                        .replace(/```[\s\S]*?```/g, '<div style="background: #f5f5f5; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-family: monospace; margin: 10px 0;">[Code Block]</div>')
+                        .replace(/#{1,6}\s+(.*)/g, '<h2>$1</h2>')
+                        .replace(/^\s*[-*+]\s+(.*)$/gm, '<p>• $1</p>')
+                        .replace(/^\s*\d+\.\s+(.*)$/gm, '<p>• $1</p>')
+                        .replace(/\n\n/g, '</p><p>')
+                        .replace(/\n/g, '<br>');
+
+                    wordContent += `
+                      <div class="bot-message">
+                        <div class="bot-bubble">
+                          <h2>CetaraGPT - Message ${index + 1}</h2>
+                          <p>${cleanText}</p>
+                        </div>
+                      </div>`;
+                }
+            });
+
+            wordContent += '</body></html>';
+
+            const blob = new Blob([wordContent], { type: 'application/msword' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `cetaragpt-chat-${new Date().toISOString().slice(0, 10)}.doc`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function downloadChatAsMarkdown() {
+            if (chatHistory.length === 0) {
+                alert('No chat history to download.');
+                return;
+            }
+
+            let markdownContent = `# CetaraGPT Chat History\n\n`;
+            markdownContent += `**Downloaded:** ${new Date().toLocaleString()}\n\n`;
+            markdownContent += `---\n\n`;
+
+            chatHistory.forEach((msg, index) => {
+                if (msg.sender === 'user') {
+                    markdownContent += `## Message ${index + 1} - User\n\n`;
+                    markdownContent += `${msg.text}\n\n`;
+                } else {
+                    markdownContent += `## Message ${index + 1} - CetaraGPT\n\n`;
+                    markdownContent += `${msg.text}\n\n`;
+                }
+                markdownContent += `---\n\n`;
+            });
+
+            const blob = new Blob([markdownContent], { type: 'text/markdown' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `cetaragpt-chat-${new Date().toISOString().slice(0, 10)}.md`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // Event listeners
+        clearBtn.addEventListener('click', async () => {
+    if (!confirm('Clear chat history?')) return;
+
+    // Try to obtain a fresh convoId from the server before clearing UI
+    try {
+        const res = await fetch('/api/openai-chat/start', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ model: modelChoice }) // optional model hint
+        });
+
+        const data = await res.json();
+        if (!res.ok || !data?.convoId) {
+            console.warn('Start endpoint returned non-ok or missing convoId:', res.status, data);
+            // fallback: remove existing convoId so the next action will request a new one
+            localStorage.removeItem('convoId');
+            convoId = null;
+        } else {
+            // Save the new convoId and use it from now on
+            convoId = data.convoId;
+            localStorage.setItem('convoId', convoId);
+            console.log('Replaced convoId with new one:', convoId);
+        }
+    } catch (err) {
+        console.error('Failed to request new convoId:', err);
+        // Remove stored convoId to force re-create on next send
+        localStorage.removeItem('convoId');
+        convoId = null;
+    }
+
+    // Clear chat history locally and rerender
+    chatHistory = [];
+    localStorage.removeItem('chatHistory');
+    renderHistory();
+
+    // Optional UX niceties
+    input.value = '';
+    input.focus();
+
+    // If you have any global/open EventSource, close it here.
+    // e.g., if you kept it as window.currentES then:
+    // if (window.currentES) { try { window.currentES.close(); } catch(e){} window.currentES = null; }
+});
+
+
+        downloadHtmlBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            downloadChatAsHTML();
+            downloadMenu.classList.remove('show');
+        });
+
+        downloadPdfBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            downloadChatAsPDF();
+            downloadMenu.classList.remove('show');
+        });
+
+        downloadWordBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            downloadChatAsWord();
+            downloadMenu.classList.remove('show');
+        });
+
+        downloadMarkdownBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            downloadChatAsMarkdown();
+            downloadMenu.classList.remove('show');
+        });
+
+        // ========== NEW: OpenAI SSE integration (adapted from assist.html) ==========
+        // API base (same-origin routes on your server)
+        const API_BASE = "";
+
+        // Keep a single server-side conversation id per browser session
+        // (persist across reloads so server-side convo can maintain context if desired)
+        let convoId = localStorage.getItem('convoId') || null;
+        let modelChoice = 'gpt-5'; // default model; change if you want to expose a selector
+
+        async function ensureConvo() {
+            if (convoId) return convoId;
+            try {
+                const res = await fetch(`${API_BASE}/api/openai-chat/start`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ model: modelChoice })
+                });
+                const data = await res.json();
+                if (!res.ok) {
+                    throw new Error(data.error || `Failed to start conversation (${res.status})`);
+                }
+                convoId = data.convoId;
+                localStorage.setItem('convoId', convoId);
+                return convoId;
+            } catch (err) {
+                console.error('Failed to start conversation', err);
+                throw err;
+            }
+        }
+
+        // Send message: uses SSE to stream assistant responses and preserves animations
+        async function sendMessage() {
+            const question = input.value.trim();
+            if (!question || isProcessing) return;
+
+            input.value = '';
+            appendUser(question);
+
+            const botBubbleDiv = document.createElement('div');
+            botBubbleDiv.classList.add('message', 'bot');
+            log.appendChild(botBubbleDiv);
+
+            // Start the nice animation while SSE connects/streams
+            startThinkingAnimation(botBubbleDiv);
+
+            isProcessing = true;
+            sendBtn.disabled = true;
+            input.disabled = true;
+
+            try {
+                await ensureConvo();
+
+                // Build SSE URL (GET) similar to assist.html to keep connection open
+                const url = `${API_BASE}/api/openai-chat/ask-sse-expt?` +
+                    `convoId=${encodeURIComponent(convoId)}&` +
+                    `q=${encodeURIComponent(question)}`;
+
+                const es = new EventSource(url);
+
+                // 'status' events update the animated status text (keeps animation intact)
+                es.addEventListener('status', (ev) => {
+                    try {
+                        const { message } = JSON.parse(ev.data || '{}');
+                        if (message) {
+                            // Update the small status element inside the animation (if present)
+                            const statusEl = botBubbleDiv.querySelector('#thinking-status');
+                            if (statusEl) {
+                                statusEl.textContent = message;
+                            } else {
+                                // fallback: replace whole bubble text small italic
+                                botBubbleDiv.innerHTML = `<div class="bubble">${escapeHtml(message)}</div>`;
+                            }
+                        }
+                    } catch (e) {
+                        // ignore parse issues
+                    }
+                });
+
+                // 'final' event contains the final assistant answer payload
+                es.addEventListener('final', (ev) => {
+                    try {
+                        const data = JSON.parse(ev.data || '{}');
+                        if (data.error) {
+                            stopThinkingAnimation();
+                            botBubbleDiv.innerHTML = `<div class="bubble">⚠️ ${escapeHtml(data.error)}</div>`;
+                        } else {
+                            stopThinkingAnimation();
+                            const markdown = data.answer || data.markdown || '';
+                            // Append to history and replace bubble with rendered markdown
+                            appendBot(markdown, botBubbleDiv);
+                        }
+                    } catch (err) {
+                        stopThinkingAnimation();
+                        botBubbleDiv.innerHTML = `<div class="bubble">⚠️ Failed to parse server response.</div>`;
+                        console.error('parse error', err);
+                    }
+                });
+
+                // 'done' signals the server is finished — close connection
+                es.addEventListener('done', () => {
+                    try { es.close(); } catch (e) { /* noop */ }
+                });
+
+                es.onerror = (e) => {
+                    try { es.close(); } catch (err) { /* noop */ }
+                    stopThinkingAnimation();
+                    botBubbleDiv.innerHTML = `<div class="bubble">⚠️ Connection error while streaming response.</div>`;
+                    console.error('SSE error', e);
+                };
+
+            } catch (err) {
+                stopThinkingAnimation();
+                const message = `⚠️ Error contacting AI server: ${err.message || 'unknown error'}`;
+                botBubbleDiv.innerHTML = `<div class="bubble">${escapeHtml(message)}</div>`;
+                console.error('sendMessage error', err);
+            } finally {
+                isProcessing = false;
+                sendBtn.disabled = false;
+                input.disabled = false;
+                input.focus();
+            }
+        }
+
+        // Hook up UI events
+        sendBtn.addEventListener('click', sendMessage);
+        input.addEventListener('keydown', e => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // ========== end SSE integration ==========
+        // Initialize everything when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            renderHistory();
+            input.focus();
+        });
+    </script>
+
+        <!-- Footer -->
+    <div w3-include-html="parts/footer.html"></div>
+    <script src="js/include_html.js"></script>
+    <script>
+      includeHTML(() => {
+        if (typeof updateNavbarLinks === 'function') {
+          updateNavbarLinks();
+        } 
+        if (typeof createParticles === 'function') {
+          createParticles(); 
+        }
+      });
+    </script>
+    <script src="js/navbarscript.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+
+</body>
+</html>
+

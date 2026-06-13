@@ -1,0 +1,551 @@
+/* ──────────────────────────────────────────────────────────────────────────
+   Admin Dashboard Styles
+   ────────────────────────────────────────────────────────────────────────── */
+
+/* Table header bar (with title and action buttons) */
+.table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+/* Scrollable table container */
+.table-container {
+  position: relative;      /* needed for sticky headers */
+  max-width: 100%;
+  max-height: 400px;       /* adjust to taste */
+  overflow-x: auto;
+  overflow-y: auto;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 4px;
+  background: #fff;
+}
+
+/* Main data table layout & sticky header */
+#data-table {
+  table-layout: fixed;
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+#data-table th,
+#data-table td {
+  padding: 8px;
+  text-align: left;
+  vertical-align: middle;
+}
+#data-table thead th {
+  position: sticky;
+  top: 0;
+  background-color: #e9ecef;
+  z-index: 2;
+  border-bottom: 2px solid #bbb;
+}
+
+/* Submissions review table borders */
+#submissions-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 24px;
+}
+#submissions-table th,
+#submissions-table td {
+  border: 1px solid #ccc;
+  padding: 6px;
+  text-align: left;
+  vertical-align: middle;
+}
+#submissions-table thead th {
+  background-color: #f8f9fa;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+/* Buttons */
+.btn-primary {
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  padding: 8px 12px;
+  cursor: pointer;
+  border-radius: 4px;
+  font-size: 14px;
+}
+.btn-secondary {
+  background-color: #6c757d;
+  color: #fff;
+  border: none;
+  padding: 8px 12px;
+  cursor: pointer;
+  border-radius: 4px;
+  font-size: 14px;
+}
+.btn-danger {
+  background-color: #dc3545;
+  color: #fff;
+  border: none;
+  padding: 8px 12px;
+  cursor: pointer;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+/* Modal backdrop + centering */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+.modal.hidden {
+  display: none;
+}
+
+/* Modal content box */
+.modal-content {
+  background: #fff;
+  padding: 20px;
+  border-radius: 4px;
+  width: 90%;
+  max-width: 600px;
+  max-height: 90%;
+  overflow-y: auto;
+}
+.modal-content.small {
+  max-width: 400px;
+}
+
+/* Add‑data form layout */
+.form-id-selection {
+  margin-bottom: 16px;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+.form-id-selection legend {
+  font-weight: bold;
+}
+.form-id-selection label {
+  display: block;
+  margin-bottom: 4px;
+  cursor: pointer;
+}
+
+/* Two‑column grid for fields */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+.form-field label {
+  display: block;
+  margin-bottom: 4px;
+  font-weight: 500;
+}
+.form-field input,
+.form-field select,
+.form-field textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 6px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+/* Form action buttons */
+.form-actions {
+  margin-top: 16px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Constrain cell size and show ellipsis when content overflows
+   ────────────────────────────────────────────────────────────────────────── */
+#data-table,
+#submissions-table {
+  table-layout: fixed;  /* needed for fixed‐width columns */
+  width: 100%;
+}
+
+#data-table td,
+#data-table th,
+#submissions-table td,
+#submissions-table th {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 150px;      /* adjust to taste */
+  max-height: 2.5em;     /* roughly two lines of text */
+  vertical-align: middle;
+}
+
+/* If you want certain columns a bit wider, target their nth‑child: */
+/* e.g. smiles (column 10) */
+#data-table td:nth-child(10),
+#data-table th:nth-child(10),
+#submissions-table td:nth-child(10),
+#submissions-table th:nth-child(10) {
+  max-width: 200px;
+}
+
+/* e.g. DOI (last column) */
+#data-table td:nth-last-child(1),
+#data-table th:nth-last-child(1),
+#submissions-table td:nth-last-child(1),
+#submissions-table th:nth-last-child(1) {
+  max-width: 250px;
+  white-space: nowrap;
+}
+
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Keep headers fully visible by allowing wrap, but still constrain data cells
+   ────────────────────────────────────────────────────────────────────────── */
+
+/* Exempt headers from ellipsis */
+#data-table th,
+#submissions-table th {
+  overflow: visible;      /* don’t hide any part of the header text */
+  white-space: normal;    /* allow header text to wrap onto multiple lines */
+  text-overflow: clip;    /* no “…” needed for headers */
+}
+
+/* Apply clipping only to body cells */
+#data-table td,
+#submissions-table td {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 150px;       /* your choice */
+  max-height: 2.5em;
+}
+
+/* Wider columns for specific data cells */
+#data-table td:nth-child(10),
+#data-table th:nth-child(10),
+#submissions-table td:nth-child(10),
+#submissions-table th:nth-child(10) {
+  max-width: 200px;
+}
+
+#data-table td:nth-last-child(1),
+#data-table th:nth-last-child(1),
+#submissions-table td:nth-last-child(1),
+#submissions-table th:nth-last-child(1) {
+  max-width: 250px;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Submissions Table: wrap headers, clip cells with ellipsis
+   ────────────────────────────────────────────────────────────────────────── */
+
+/* Allow submissions headers to wrap fully */
+#submissions-table th {
+  overflow: visible;      /* show all header text */
+  white-space: normal;    /* wrap onto multiple lines */
+  text-overflow: clip;    /* no ellipsis for headers */
+}
+
+/* Clip submissions data cells */
+#submissions-table td {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 150px;       /* adjust as needed */
+  max-height: 2.5em;      /* roughly two lines */
+}
+
+/* Give extra room to the SMILES column (e.g. column 10) */
+#submissions-table td:nth-child(10),
+#submissions-table th:nth-child(10) {
+  max-width: 200px;
+}
+
+/* Give extra room to the DOI Reference column (last column) */
+#submissions-table td:nth-last-child(1),
+#submissions-table th:nth-last-child(1) {
+  max-width: 250px;
+}
+ubuntu@mail:/var/www/For_the_library/public/css$ sudo nano admin.css 
+ubuntu@mail:/var/www/For_the_library/public/css$ cat admin.css 
+/* ──────────────────────────────────────────────────────────────────────────
+   Admin Dashboard Styles
+   ────────────────────────────────────────────────────────────────────────── */
+
+/* Table header bar (with title and action buttons) */
+.table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+/* Scrollable table container */
+.table-container {
+  position: relative;      /* needed for sticky headers */
+  max-width: 100%;
+  max-height: 400px;       /* adjust to taste */
+  overflow-x: auto;
+  overflow-y: auto;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 4px;
+  background: #fff;
+}
+
+/* Main data table layout & sticky header */
+#data-table {
+  table-layout: fixed;
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+#data-table th,
+#data-table td {
+  padding: 8px;
+  text-align: left;
+  vertical-align: middle;
+}
+#data-table thead th {
+  position: sticky;
+  top: 0;
+  background-color: #e9ecef;
+  z-index: 2;
+  border-bottom: 2px solid #bbb;
+}
+
+/* Submissions review table borders */
+#submissions-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 24px;
+}
+#submissions-table th,
+#submissions-table td {
+  border: 1px solid #ccc;
+  padding: 6px;
+  text-align: left;
+  vertical-align: middle;
+}
+#submissions-table thead th {
+  background-color: #f8f9fa;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+/* Buttons */
+.btn-primary {
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  padding: 8px 12px;
+  cursor: pointer;
+  border-radius: 4px;
+  font-size: 14px;
+}
+.btn-secondary {
+  background-color: #6c757d;
+  color: #fff;
+  border: none;
+  padding: 8px 12px;
+  cursor: pointer;
+  border-radius: 4px;
+  font-size: 14px;
+}
+.btn-danger {
+  background-color: #dc3545;
+  color: #fff;
+  border: none;
+  padding: 8px 12px;
+  cursor: pointer;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+/* Modal backdrop + centering */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+.modal.hidden {
+  display: none;
+}
+
+/* Modal content box */
+.modal-content {
+  background: #fff;
+  padding: 20px;
+  border-radius: 4px;
+  width: 90%;
+  max-width: 600px;
+  max-height: 90%;
+  overflow-y: auto;
+}
+.modal-content.small {
+  max-width: 400px;
+}
+
+/* Add‑data form layout */
+.form-id-selection {
+  margin-bottom: 16px;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+.form-id-selection legend {
+  font-weight: bold;
+}
+.form-id-selection label {
+  display: block;
+  margin-bottom: 4px;
+  cursor: pointer;
+}
+
+/* Two‑column grid for fields */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+.form-field label {
+  display: block;
+  margin-bottom: 4px;
+  font-weight: 500;
+}
+.form-field input,
+.form-field select,
+.form-field textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 6px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+/* Form action buttons */
+.form-actions {
+  margin-top: 16px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Constrain cell size and show ellipsis when content overflows
+   ────────────────────────────────────────────────────────────────────────── */
+#data-table,
+#submissions-table {
+  table-layout: fixed;  /* needed for fixed‐width columns */
+  width: 100%;
+}
+
+#data-table td,
+#data-table th,
+#submissions-table td,
+#submissions-table th {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 150px;      /* adjust to taste */
+  max-height: 2.5em;     /* roughly two lines of text */
+  vertical-align: middle;
+}
+
+/* If you want certain columns a bit wider, target their nth‑child: */
+/* e.g. smiles (column 10) */
+#data-table td:nth-child(10),
+#data-table th:nth-child(10),
+#submissions-table td:nth-child(10),
+#submissions-table th:nth-child(10) {
+  max-width: 200px;
+}
+
+/* e.g. DOI (last column) */
+#data-table td:nth-last-child(1),
+#data-table th:nth-last-child(1),
+#submissions-table td:nth-last-child(1),
+#submissions-table th:nth-last-child(1) {
+  max-width: 250px;
+  white-space: nowrap;
+}
+
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Keep headers fully visible by allowing wrap, but still constrain data cells
+   ────────────────────────────────────────────────────────────────────────── */
+
+/* Exempt headers from ellipsis */
+#data-table th,
+#submissions-table th {
+  overflow: visible;      /* don’t hide any part of the header text */
+  white-space: normal;    /* allow header text to wrap onto multiple lines */
+  text-overflow: clip;    /* no “…” needed for headers */
+}
+
+/* Apply clipping only to body cells */
+#data-table td,
+#submissions-table td {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 150px;       /* your choice */
+  max-height: 2.5em;
+}
+
+/* Wider columns for specific data cells */
+#data-table td:nth-child(10),
+#data-table th:nth-child(10),
+#submissions-table td:nth-child(10),
+#submissions-table th:nth-child(10) {
+  max-width: 200px;
+}
+
+#data-table td:nth-last-child(1),
+#data-table th:nth-last-child(1),
+#submissions-table td:nth-last-child(1),
+#submissions-table th:nth-last-child(1) {
+  max-width: 250px;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Override submissions to use auto layout (so headers size themselves),
+   but still clip the <tbody> cells with ellipsis
+   ────────────────────────────────────────────────────────────────────────── */
+#submissions-table {
+  table-layout: auto !important;
+}
+
+/* Let the headers wrap freely */
+#submissions-table thead th {
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+}
+
+/* Constrain only the data cells */
+#submissions-table tbody td {
+  max-width: 150px;       /* adjust as needed */
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}

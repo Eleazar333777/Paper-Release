@@ -1,0 +1,47 @@
+
+  function includeHTML() {
+    const elements = document.querySelectorAll('[w3-include-html]');
+    const promises = [];
+
+    elements.forEach(el => {
+      const file = el.getAttribute('w3-include-html');
+      if (!file) return;
+
+      const promise = fetch(file)
+        .then(response => {
+          if (!response.ok) throw new Error(`Failed to fetch ${file}`);
+          return response.text();
+        })
+        .then(data => {
+          el.outerHTML = data;
+        })
+        .catch(error => {
+          console.error(error);
+        });
+
+      promises.push(promise);
+    });
+
+    return Promise.all(promises);
+  }
+
+  includeHTML().then(() => {
+    console.log("✅ Includes loaded.");
+
+    const loggedIn = localStorage.getItem("isLoggedIn") === "true";
+
+    const show = id => document.getElementById(id)?.style.setProperty('display', 'block');
+    const hide = id => document.getElementById(id)?.style.setProperty('display', 'none');
+
+    if (loggedIn) {
+      show("navGraph");
+      show("navTable");
+      show("navLogout");
+      hide("navAccountLoggedOut");
+    } else {
+      hide("navGraph");
+      hide("navTable");
+      hide("navLogout");
+      show("navAccountLoggedOut");
+    }
+  });

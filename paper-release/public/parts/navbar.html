@@ -1,0 +1,192 @@
+<!-- parts/navbar.html -->
+<style>
+  :root {
+    --primary-blue: #0066ff;
+    --accent-cyan: #00d4ff;
+    --text-white: #ffffff;
+    --gradient: linear-gradient(135deg, #0066ff 0%, #00d4ff 100%);
+  }
+
+ .navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1050;
+  padding: 0.2rem 1rem;
+  background: transparent;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgb(46, 78, 168);
+  overflow: visible; /* Ensure pseudo-element stays clipped */
+}
+
+/* Pseudo-element holds gradient */
+  .navbar::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, rgba(2,30,38,0.8) 0%, rgba(15,71,178,0.8) 100%);
+    z-index: -1; /* behind the navbar content */
+  }
+
+
+  .logo-group {
+    display: flex;
+    align-items: center;
+  }
+
+  .logo-img {
+    height: 30px;
+    max-width: 180px;
+    width: auto;
+    object-fit: contain;
+  }
+
+  .logo-text {
+    font-size: 1.5rem;
+    font-weight: 700;
+    font-family: 'Poppins', sans-serif;
+    background: var(--gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .navbar-nav .nav-link {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 500;
+    font-size: 0.95rem;
+    color: var(--text-white);
+    margin-left: 1.5rem;
+    transition: color 0.2s ease-in-out;
+  }
+
+  .navbar-nav .nav-link:hover {
+    color: var(--accent-cyan);
+  }
+
+  .dropdown-menu {
+    background: rgba(0, 20, 40, 0.95) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    z-index: 2000;
+  }
+
+  .dropdown-menu a {
+    color: var(--text-white);
+  }
+
+  .dropdown-menu a:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--accent-cyan);
+  }
+
+  #navLogout .nav-link {
+    color: #ff6b6b !important;
+    font-weight: 600;
+  }
+
+  #navLogout .nav-link:hover {
+    color: #ff5252 !important;
+  }
+
+  .navbar-toggler {
+    border-color: rgba(255, 255, 255, 0.3);
+  }
+
+  .navbar-toggler-icon {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.85%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+  }
+
+  @media (max-width: 991px) {
+    .navbar {
+      padding: 1rem;
+    }
+
+    .navbar-nav {
+      padding: 1rem 0;
+    }
+
+    .navbar-nav .nav-link {
+      margin-left: 0;
+      padding: 0.75rem 1rem;
+    }
+
+    .navbar-collapse {
+      background: rgba(2, 30, 38, 0.95);
+      backdrop-filter: blur(20px);
+      border-radius: 8px;
+      margin-top: 1rem;
+      padding: 0.5rem;
+    }
+
+    .dropdown-menu {
+      background: rgba(0, 20, 40, 0.7) !important;
+      border: none;
+      padding-left: 1rem;
+    }
+  }
+</style>
+
+<nav class="navbar navbar-expand-lg px-3 py-2 shadow-sm">
+  <div class="container-fluid d-flex justify-content-between align-items-center px-3">
+    <a class="navbar-brand logo-group" href="index.html">
+      <img
+        src="https://raw.githubusercontent.com/MSan789/Cetara/f0a6eb9c2eb06eb1461ea52da74fc6333148538e/revised%20cetara1.png"
+        alt="Cetara graphic"
+        class="logo-img"
+      />
+    </a>
+
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+      data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown"
+      aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse justify-content-end" id="navbarNavDropdown">
+      <ul class="navbar-nav align-items-lg-center">
+        <li class="nav-item"><a class="nav-link" href="aboutus.html">About Us</a></li>
+        <li class="nav-item"><a class="nav-link" href="pfas.html">What is PFAS?</a></li>
+        <li class="nav-item">
+            <a class="nav-link" href="gptdemo.html">GPT Demo</a>
+        </li>
+
+        <!-- ✅ CetaraGPT (Visible when logged in) -->
+        <li class="nav-item" id="navCetaraGPT" style="display: none;">
+          <a class="nav-link" href="assist.html">CetaraGPT</a>
+        </li>
+
+
+        <!-- ✅ Graph Dropdown (Visible when logged in) -->
+        <li class="nav-item dropdown" id="navGraph" style="display: none;">
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Graphs
+          </a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="datagraph.html">Removal Rate Graph</a></li>
+            <li><a class="dropdown-item" href="tradeoffs.html">Trade-Off Graphs</a></li>
+          </ul>
+        </li>
+
+        <li class="nav-item" id="navTable" style="display: none;"><a class="nav-link" href="datatable.html">Table</a></li>
+        <li class="nav-item" id="navSubmit" style="display: none;"><a class="nav-link" href="submit.html">Submit Data</a></li>
+
+        <!-- ✅ Account Dropdown -->
+        <li class="nav-item dropdown" id="navAccountLoggedOut">
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Account
+          </a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="login.html">Login</a></li>
+            <li><a class="dropdown-item" href="requestaccount.html">Register</a></li>
+          </ul>
+        </li>
+
+        <li class="nav-item" id="navLogout" style="display: none;">
+          <a class="nav-link" href="#" onclick="logout()">Logout</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
