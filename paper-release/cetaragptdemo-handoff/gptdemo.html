@@ -1,0 +1,1406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>CetaraGPT</title>
+<link rel="icon" type="image/x-icon" href="/images/cetara.ico" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<!-- Display + body + mono font pairing -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;0,8..60,600;0,8..60,700;1,8..60,400;1,8..60,500;1,8..60,600&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+
+<!-- KaTeX for inline/display math in agent responses -->
+<link rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/katex.min.css"
+      crossorigin="anonymous">
+<script defer
+        src="https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/katex.min.js"
+        crossorigin="anonymous"></script>
+<script defer
+        src="https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/contrib/auto-render.min.js"
+        crossorigin="anonymous"></script>
+
+<style>
+/* CetaraGPT chatbot styles.
+   Rung colors kept consistent with the manuscript figures:
+   vanilla #D55E00, eci #E69F00, rag #0072B2, agentic #009E73. */
+
+:root {
+  /* Paper & ink ─────────────────────────────────────────── */
+  --color-paper:        oklch(96.8% 0.008 80);    /* warm cream */
+  --color-paper-2:      oklch(93.5% 0.012 80);    /* hover surface */
+  --color-paper-3:      oklch(89% 0.015 80);      /* deeper recess */
+  --color-ink:          oklch(20% 0.005 270);     /* near-black slate */
+  --color-ink-2:        oklch(34% 0.008 270);     /* secondary body */
+  --color-ink-3:        oklch(50% 0.010 270);     /* tertiary */
+  --color-ink-4:        oklch(70% 0.005 270);     /* faded */
+  --color-rule:         oklch(82% 0.010 80);      /* hairline rule */
+
+  /* Accent - ink-blue ───────────────────────────────────── */
+  --color-accent:       oklch(34% 0.075 250);
+  --color-accent-hover: oklch(28% 0.085 250);
+  --color-accent-soft:  oklch(94% 0.022 250);
+  --color-focus-ring:   oklch(60% 0.18 30);
+
+  /* Rung accents - preserved verbatim from paper figures ── */
+  --color-vanilla:      #D55E00;
+  --color-eci:          #E69F00;
+  --color-rag:          #0072B2;
+  --color-agentic:      #009E73;
+  --color-agentic-soft: oklch(93% 0.04 160);
+
+  /* Status ──────────────────────────────────────────────── */
+  --color-warn-soft:    oklch(94% 0.04 65);
+  --color-warn-rule:    oklch(70% 0.12 65);
+  --color-warn-ink:     oklch(38% 0.10 50);
+  --color-error:        oklch(50% 0.18 25);
+
+  /* Fonts (2+1: serif display + sans body + mono) ───────── */
+  --font-display: "Source Serif 4", "Source Serif Pro", Georgia,
+                  "Times New Roman", serif;
+  --font-body:    "Inter", -apple-system, BlinkMacSystemFont,
+                  "Helvetica Neue", Arial, sans-serif;
+  --font-mono:    "IBM Plex Mono", ui-monospace, "SF Mono",
+                  Menlo, Consolas, monospace;
+
+  /* Spacing - 4 pt scale ─────────────────────────────────── */
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  20px;
+  --space-6:  24px;
+  --space-7:  32px;
+  --space-8:  40px;
+  --space-9:  56px;
+  --space-10: 80px;
+
+  /* Text scale ──────────────────────────────────────────── */
+  --text-display:    44px;
+  --text-display-s:  30px;
+  --text-h1:         26px;
+  --text-h2:         22px;
+  --text-h3:         17px;
+  --text-body:       16px;
+  --text-small:      14px;
+  --text-xs:         12px;
+  --text-mini:       11px;
+
+  /* Easings + durations ─────────────────────────────────── */
+  --ease-out:    cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-in:     cubic-bezier(0.4, 0, 1, 0.6);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --dur-fast:    120ms;
+  --dur-base:    200ms;
+  --dur-slow:    320ms;
+
+  /* Rules + radii ───────────────────────────────────────── */
+  --rule-hair:   1px solid var(--color-rule);
+  --rule-bold:   2px solid var(--color-ink);
+  --radius-sm:   4px;
+  --radius:      8px;
+  --radius-lg:   14px;
+}
+
+/* Base ───────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; overflow-x: clip; }
+body {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+a {
+  color: var(--color-accent);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+  transition: color var(--dur-fast) var(--ease-out);
+}
+a:hover { color: var(--color-accent-hover); }
+a:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+::selection { background: var(--color-accent-soft); color: var(--color-ink); }
+strong { font-weight: 600; }
+em { font-style: italic; }
+
+/* App shell ──────────────────────────────────────────────── */
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Masthead ───────────────────────────────────────────────── */
+.masthead {
+  flex-shrink: 0;
+  padding: var(--space-6) var(--space-7) var(--space-4);
+  border-bottom: var(--rule-bold);
+  background: var(--color-paper);
+}
+.masthead .inner { max-width: 760px; margin: 0 auto; }
+.wordmark {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-display-s);
+  font-weight: 600;
+  font-style: italic;
+  letter-spacing: -0.015em;
+  color: var(--color-ink);
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+.dateline {
+  margin-top: var(--space-1);
+  font-family: var(--font-mono);
+  font-size: var(--text-mini);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--color-ink-3);
+}
+
+/* Scrollable main ────────────────────────────────────────── */
+.scroll {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: clip;
+}
+.container {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: var(--space-8) var(--space-6) var(--space-9);
+}
+
+/* Welcome state ──────────────────────────────────────────── */
+.welcome { animation: fade-in var(--dur-slow) var(--ease-out); }
+.lede-headline {
+  margin: 0 0 var(--space-4);
+  font-family: var(--font-display);
+  font-size: var(--text-display);
+  font-weight: 600;
+  font-style: italic;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+  color: var(--color-ink);
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+.lede-body {
+  margin: 0 0 var(--space-7);
+  font-family: var(--font-body);
+  font-size: 17px;
+  line-height: 1.65;
+  color: var(--color-ink-2);
+  max-width: 60ch;
+}
+
+/* Examples - pull-quote cards ────────────────────────────── */
+.examples {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--space-4) var(--space-7);
+  margin: 0 0 var(--space-6);
+}
+.example {
+  border-left: 2px solid var(--color-rule);
+  padding: var(--space-2) 0 var(--space-2) var(--space-4);
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  line-height: 1.5;
+  color: var(--color-ink);
+  transition: border-color var(--dur-base) var(--ease-out),
+              padding-left var(--dur-base) var(--ease-out);
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.example:hover,
+.example:focus-visible {
+  border-left-color: var(--color-accent);
+  padding-left: var(--space-5);
+  outline: none;
+}
+.example .tag {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: var(--text-mini);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-accent);
+  margin-bottom: var(--space-1);
+}
+
+/* Lucky link + rate-note colophon ────────────────────────── */
+.lucky-row {
+  margin: 0 0 var(--space-6);
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  color: var(--color-ink-2);
+}
+.lucky {
+  cursor: pointer;
+  font-style: italic;
+}
+.rate-note {
+  margin: var(--space-7) 0 0;
+  padding-top: var(--space-4);
+  border-top: var(--rule-hair);
+  font-family: var(--font-body);
+  font-size: var(--text-small);
+  color: var(--color-ink-3);
+  line-height: 1.6;
+}
+.rate-note a { font-style: normal; }
+
+/* Chat thread ────────────────────────────────────────────── */
+.thread { margin-top: var(--space-7); }
+.msg {
+  margin: 0 0 var(--space-8);
+  animation: fade-in var(--dur-base) var(--ease-out);
+}
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* User message - solid ink-blue, right-aligned ──────────── */
+.msg.user { display: flex; justify-content: flex-end; }
+.msg.user .bubble {
+  background: var(--color-accent);
+  color: var(--color-paper);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-sm) var(--radius) var(--radius-sm) var(--radius);
+  max-width: 78%;
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  line-height: 1.55;
+  word-wrap: break-word;
+  overflow-wrap: anywhere;
+}
+.msg.user .bubble a {
+  color: var(--color-paper);
+  text-decoration: underline;
+}
+
+/* Agent message - typeset prose, no bubble fill ─────────── */
+.msg.agent { display: block; }
+.msg.agent .bubble {
+  background: transparent;
+  padding: 0;
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  line-height: 1.6;
+  color: var(--color-ink);
+  word-wrap: break-word;
+  overflow-wrap: anywhere;
+}
+.msg.agent .bubble :first-child { margin-top: 0; }
+.msg.agent .bubble :last-child  { margin-bottom: 0; }
+.msg.agent .bubble p { margin: 0 0 var(--space-3); }
+.msg.agent .bubble code {
+  font-family: var(--font-mono);
+  font-size: 0.92em;
+  background: var(--color-paper-2);
+  padding: 1px 4px;
+  border-radius: 3px;
+}
+.msg.agent .bubble ul,
+.msg.agent .bubble ol {
+  margin: var(--space-2) 0 var(--space-3);
+  padding-left: var(--space-5);
+}
+.msg.agent .bubble li {
+  margin-bottom: var(--space-1);
+  line-height: 1.55;
+}
+.msg.agent .bubble .resp-h {
+  margin: var(--space-4) 0 var(--space-2);
+  font-family: var(--font-display);
+  font-size: var(--text-h3);
+  font-weight: 600;
+  font-style: italic;
+  color: var(--color-ink);
+}
+.msg.agent .bubble .resp-h:first-child { margin-top: 0; }
+.msg.agent .bubble .katex { font-size: 1em; }
+.msg.agent .bubble .katex-display { margin: var(--space-3) 0; }
+
+/* DOI / external-paper links - ink-blue, mono, with an arrow glyph
+   so it's obvious they open the source in a new tab. */
+.msg.agent .bubble a.doi-link,
+.msg.user  .bubble a.doi-link {
+  font-family: var(--font-mono);
+  font-size: 0.92em;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+  white-space: nowrap;
+}
+.msg.agent .bubble a.doi-link::after {
+  content: " \2197";              /* ↗  north-east arrow */
+  font-family: var(--font-body);
+  font-size: 0.85em;
+  margin-left: 1px;
+  color: var(--color-ink-3);
+  text-decoration: none;
+  display: inline-block;
+}
+.msg.agent .bubble a.doi-link:hover::after {
+  color: var(--color-accent-hover);
+}
+
+/* Compare grid - two columns under hairline rules ───────── */
+.compare-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--space-8);
+}
+.compare-col {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.compare-col.vanilla { --rung-color: var(--color-vanilla); }
+.compare-col.agentic { --rung-color: var(--color-agentic); }
+.rung-tag {
+  font-family: var(--font-mono);
+  font-size: var(--text-mini);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--rung-color);
+  padding-bottom: var(--space-2);
+  border-bottom: 2px solid var(--rung-color);
+  align-self: flex-start;
+  margin-bottom: var(--space-4);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+.rung-tag .dot { display: none; }   /* the rule already identifies the rung */
+
+@media (max-width: 820px) {
+  .compare-grid { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* Thinking state + tool chips ────────────────────────────── */
+.thinking-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+  font-family: var(--font-body);
+  font-size: var(--text-small);
+  font-style: italic;
+  color: var(--color-ink-3);
+}
+.dots { display: inline-flex; gap: 4px; }
+.dots span {
+  width: 5px; height: 5px;
+  background: var(--color-ink-3);
+  border-radius: 50%;
+  animation: pulse 1.4s ease-in-out infinite;
+}
+.dots span:nth-child(2) { animation-delay: 0.18s; }
+.dots span:nth-child(3) { animation-delay: 0.36s; }
+@keyframes pulse {
+  0%, 80%, 100% { opacity: 0.25; transform: scale(0.85); }
+  40%           { opacity: 1.0;  transform: scale(1.0); }
+}
+
+.chip-row { display: flex; flex-wrap: wrap; gap: var(--space-1); }
+.chip {
+  font-family: var(--font-mono);
+  font-size: var(--text-mini);
+  font-weight: 500;
+  padding: 3px 8px;
+  background: var(--color-paper);
+  color: var(--color-ink-3);
+  border: 1px solid var(--color-rule);
+  border-radius: 3px;
+  user-select: none;
+  transition: background var(--dur-base) var(--ease-out),
+              color var(--dur-base) var(--ease-out),
+              border-color var(--dur-base) var(--ease-out);
+}
+.chip.idle { animation: chip-idle 2.4s ease-in-out infinite; }
+@keyframes chip-idle {
+  0%, 100% { opacity: 0.55; }
+  50%      { opacity: 0.85; }
+}
+.chip.active {
+  background: var(--color-agentic-soft);
+  color: var(--color-agentic);
+  border-color: var(--color-agentic);
+  animation: none;
+}
+.chip.used {
+  background: var(--color-paper);
+  color: var(--color-ink-3);
+  border-color: var(--color-ink-4);
+  animation: none;
+}
+.chip .count { margin-left: 4px; font-size: 0.85em; opacity: 0.7; }
+.no-tools-note {
+  font-family: var(--font-body);
+  font-style: italic;
+  font-size: var(--text-small);
+  color: var(--color-ink-3);
+}
+
+/* Tool-call trace - collapsed footnote drawer ───────────── */
+.trace {
+  margin-top: var(--space-4);
+  padding-top: var(--space-3);
+  border-top: var(--rule-hair);
+}
+.trace summary {
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: var(--text-small);
+  font-style: italic;
+  color: var(--color-ink-3);
+  list-style: none;
+  padding: var(--space-1) 0;
+}
+.trace summary::-webkit-details-marker { display: none; }
+.trace summary::before {
+  content: "›";
+  display: inline-block;
+  margin-right: 4px;
+  transition: transform var(--dur-base) var(--ease-out);
+}
+.trace[open] summary::before { transform: rotate(90deg); }
+.trace .call {
+  margin-top: var(--space-1);
+  padding: var(--space-2) 0;
+  font-family: var(--font-mono);
+  font-size: var(--text-mini);
+  line-height: 1.5;
+  color: var(--color-ink-2);
+  border-top: var(--rule-hair);
+}
+.trace .call:first-of-type { border-top: 0; padding-top: 0; }
+.trace .call .tname { color: var(--color-accent); font-weight: 600; }
+.trace .call .args  { color: var(--color-ink-3); }
+.trace .call .arrow { color: var(--color-ink-4); padding: 0 4px; }
+
+/* Soft inline notice (rate-limit) ────────────────────────── */
+.soft-notice {
+  background: var(--color-warn-soft);
+  border: 1px solid var(--color-warn-rule);
+  border-left: 3px solid var(--color-warn-rule);
+  border-radius: var(--radius-sm);
+  padding: var(--space-3) var(--space-4);
+  font-family: var(--font-body);
+  font-size: var(--text-small);
+  color: var(--color-warn-ink);
+  line-height: 1.55;
+}
+
+/* Composer ──────────────────────────────────────────────── */
+.composer-wrap {
+  flex-shrink: 0;
+  background: var(--color-paper);
+  border-top: var(--rule-bold);
+  padding: var(--space-4) var(--space-6) var(--space-5);
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+}
+.composer-wrap > * { max-width: 760px; margin-left: auto; margin-right: auto; }
+
+.composer {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-2);
+  padding: var(--space-2);
+  background: var(--color-paper);
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius);
+  transition: border-color var(--dur-base) var(--ease-out),
+              box-shadow var(--dur-base) var(--ease-out);
+}
+.composer:focus-within {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px var(--color-accent-soft);
+}
+textarea {
+  flex: 1;
+  min-width: 0;
+  resize: none;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  padding: var(--space-2) var(--space-3);
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  line-height: 1.5;
+  color: var(--color-ink);
+  max-height: 160px;
+}
+textarea::placeholder {
+  color: var(--color-ink-4);
+  font-style: italic;
+}
+
+.send, .key-btn {
+  flex-shrink: 0;
+  width: 36px; height: 36px;
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--dur-fast) var(--ease-out),
+              color var(--dur-fast) var(--ease-out),
+              transform var(--dur-fast) var(--ease-out),
+              box-shadow var(--dur-fast) var(--ease-out);
+}
+.send {
+  background: var(--color-accent);
+  color: var(--color-paper);
+}
+.send:hover:not(:disabled) { background: var(--color-accent-hover); }
+.send:active:not(:disabled) { transform: scale(0.94); }
+.send:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+.send:disabled {
+  background: var(--color-ink-4);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+.send svg { width: 16px; height: 16px; fill: currentColor; }
+
+.key-btn {
+  background: var(--color-paper-2);
+  color: var(--color-ink-3);
+  border: 1px solid var(--color-rule);
+}
+.key-btn:hover {
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+}
+.key-btn:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+.key-btn.active {
+  background: var(--color-agentic-soft);
+  color: var(--color-agentic);
+  border-color: var(--color-agentic);
+}
+.key-btn svg { width: 16px; height: 16px; fill: currentColor; }
+
+/* BYOK panel - editor's-note sidebar ───────────────────── */
+.byok-panel {
+  margin-bottom: var(--space-3);
+  padding: var(--space-4) var(--space-5);
+  background: var(--color-paper);
+  border: 1px solid var(--color-rule);
+  border-top: 3px solid var(--color-accent);
+  border-radius: var(--radius);
+  animation: fade-in var(--dur-base) var(--ease-out);
+}
+.byok-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: var(--space-2);
+}
+.byok-title {
+  font-family: var(--font-display);
+  font-size: var(--text-h3);
+  font-weight: 600;
+  font-style: italic;
+  color: var(--color-ink);
+}
+.byok-close {
+  background: transparent;
+  border: 0;
+  color: var(--color-ink-3);
+  cursor: pointer;
+  font-size: 14px;
+  padding: 4px 6px;
+  border-radius: 4px;
+  transition: background var(--dur-fast) var(--ease-out),
+              color var(--dur-fast) var(--ease-out);
+}
+.byok-close:hover { background: var(--color-paper-2); color: var(--color-ink); }
+.byok-close:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+.byok-blurb {
+  margin: 0 0 var(--space-3);
+  font-family: var(--font-body);
+  font-size: var(--text-small);
+  line-height: 1.55;
+  color: var(--color-ink-2);
+}
+.byok-row {
+  display: flex;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+.byok-row input {
+  flex: 1;
+  min-width: 0;
+  padding: var(--space-2) var(--space-3);
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  color: var(--color-ink);
+  background: var(--color-paper-2);
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-sm);
+  outline: 0;
+  transition: border-color var(--dur-fast) var(--ease-out),
+              box-shadow var(--dur-fast) var(--ease-out);
+}
+.byok-row input:focus-visible {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px var(--color-accent-soft);
+  background: var(--color-paper);
+}
+.byok-row input.invalid {
+  border-color: var(--color-error);
+  box-shadow: 0 0 0 3px oklch(94% 0.06 25);
+}
+.byok-save {
+  flex-shrink: 0;
+  padding: 0 var(--space-4);
+  background: var(--color-accent);
+  color: var(--color-paper);
+  border: 0;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  font-size: var(--text-small);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-out);
+}
+.byok-save:hover { background: var(--color-accent-hover); }
+.byok-save:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+.byok-save.danger { background: var(--color-error); }
+.byok-save.danger:hover { background: oklch(42% 0.18 25); }
+.byok-trust {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  line-height: 1.55;
+  color: var(--color-ink-3);
+  font-style: italic;
+}
+.byok-trust code {
+  font-family: var(--font-mono);
+  font-size: 0.88em;
+  font-style: normal;
+  padding: 1px 4px;
+  background: var(--color-paper-2);
+  border-radius: 3px;
+}
+.byok-trust a { font-style: normal; }
+
+/* Hidden utility ────────────────────────────────────────── */
+.hidden { display: none !important; }
+
+/* Reduced motion ────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Mobile ────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .masthead { padding: var(--space-5) var(--space-5) var(--space-3); }
+  .wordmark { font-size: 26px; }
+  .container { padding: var(--space-6) var(--space-5) var(--space-9); }
+  .lede-headline { font-size: 32px; }
+  .lede-body { font-size: 16px; }
+  .examples { grid-template-columns: minmax(0, 1fr); gap: var(--space-3); }
+  .compare-grid { grid-template-columns: minmax(0, 1fr); gap: var(--space-6); }
+  .composer-wrap { padding: var(--space-3) var(--space-4) var(--space-4); }
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <header class="masthead">
+    <div class="inner">
+      <h1 class="wordmark">CetaraGPT</h1>
+      <div class="dateline">A live comparison · Vanilla LLM &middot; Agentic RAG &middot; 1,017-record PFAS-membrane dataset</div>
+    </div>
+  </header>
+
+  <main class="scroll" id="scroll">
+    <div class="container">
+
+      <section class="welcome" id="welcome">
+        <h2 class="lede-headline">Ask about PFAS removal.</h2>
+        <p class="lede-body">
+          Every question is answered twice &mdash; first by a vanilla language model relying
+          only on its pretraining knowledge, then by the full Agentic RAG architecture from
+          the manuscript. The two responses appear side by side so the difference is visible
+          at a glance.
+        </p>
+
+        <div class="examples" id="examples"></div>
+
+        <p class="lucky-row">
+          Or press <a href="#" id="lucky" class="lucky">I&rsquo;m feeling lucky</a> for a
+          randomly chosen example.
+        </p>
+
+        <p class="rate-note">
+          <em>This public demo is rate-limited to roughly three queries per minute. To work
+          unmetered, <a href="#" id="open-byok-link">supply your own Gemini API key</a> &mdash;
+          it&rsquo;s used only for your request and never logged or stored on the server.</em>
+        </p>
+      </section>
+
+      <section class="thread" id="thread"></section>
+
+    </div>
+  </main>
+
+  <div class="composer-wrap">
+
+    <!-- BYOK editor's note - hidden until the key button is toggled open -->
+    <div class="byok-panel" id="byok-panel" hidden>
+      <div class="byok-head">
+        <span class="byok-title">Use your own Gemini API key</span>
+        <button class="byok-close" id="byok-close" aria-label="Close">&#x2715;</button>
+      </div>
+      <p class="byok-blurb">
+        With a personal key, requests run on your own quota &mdash; no demo rate limits, and
+        faster responses when the public demo is busy.
+      </p>
+      <div class="byok-row">
+        <input id="byok-input" type="password" autocomplete="off"
+               spellcheck="false" placeholder="AIzaSy&hellip;" />
+        <button class="byok-save" id="byok-save">Save</button>
+      </div>
+      <p class="byok-trust">
+        Your key is sent over HTTPS, used only for the request you&rsquo;re about to make,
+        and <strong>never logged or stored on the server</strong>. It lives in your
+        browser&rsquo;s <code>sessionStorage</code> and is cleared when this tab closes. You
+        can revoke it any time at
+        <a href="https://aistudio.google.com/apikey" target="_blank"
+           rel="noopener">aistudio.google.com/apikey</a>.
+      </p>
+    </div>
+
+    <div class="composer">
+      <textarea id="input" placeholder="Ask something&hellip;" rows="1"></textarea>
+      <button class="key-btn" id="key-btn" aria-label="Use your own API key">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M14 6a4 4 0 1 0-3.9 5L7 14H4v3l3 .01V20l3-.01V17l1-1 .1-.1A4 4 0 0 0 14 6zm-4 5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
+        </svg>
+      </button>
+      <button class="send" id="send" aria-label="Send">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M3.4 20.7 21 12 3.4 3.3 3 10l13 2-13 2z"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ============================================================
+// Constants
+// ============================================================
+const API_BASE = "https://cetara.jinyue-jiang.com";   // gptdemo.html (data-here.com) calls the Oracle backend cross-origin
+    const POLL_MS = 220;
+const RUNGS_TO_SHOW = ["vanilla", "agentic"];   // always render both side-by-side
+const BYOK_KEY_NAME = "cetara-byok";            // sessionStorage entry name
+const BYOK_FORMAT_RE = /^AIzaSy[A-Za-z0-9_\-]{30,40}$/;
+
+const EXAMPLES = [
+  { tag: "Range lookup",
+    text: "What is the range of PFOA rejection reported for the NF270 membrane? Cite the DOIs." },
+  { tag: "Multi-objective",
+    text: "Recommend a polyamide membrane that achieves PFOA > 90% AND PFHxA > 92% simultaneously, while maximizing water permeance." },
+  { tag: "Upper bound",
+    text: "What is the fitted permeability–selectivity upper bound for PFOS?" },
+  { tag: "Ranked picks",
+    text: "Top 3 commercial and top 3 non-commercial membranes for PFOA removal, ranked by ideal-point distance in normalized log10(A)–log10(A/B) space (smaller distance to the ideal point of max A, max A/B = better balance of permeance and selectivity)." },
+  { tag: "Within bound",
+    text: "Which polyamide membranes lie within 30% of the PFOA upper bound? List up to 5." },
+  { tag: "Head-to-head",
+    text: "Compare NF270 and NF90 head-to-head on PFOA removal: rejection range, mean water permeance, and typical operating conditions." },
+  { tag: "Short-chain",
+    text: "What is the highest reported rejection of PFBA by any non-commercial polyamide membrane, and which paper reports it?" },
+  { tag: "Coverage",
+    text: "Which commercial polyamide membrane has been tested on the largest number of distinct PFAS species?" },
+];
+
+let TOOL_NAMES = ["filter_records", "rank_membranes", "get_upper_bound",
+                  "cite_papers", "find_multi_pfas_membrane", "run_sql"];
+
+// ============================================================
+// DOM helpers
+// ============================================================
+const $scroll   = document.getElementById("scroll");
+const $thread   = document.getElementById("thread");
+const $welcome  = document.getElementById("welcome");
+const $examples = document.getElementById("examples");
+const $lucky    = document.getElementById("lucky");
+const $input    = document.getElementById("input");
+const $send     = document.getElementById("send");
+
+const $keyBtn    = document.getElementById("key-btn");
+const $byokPanel = document.getElementById("byok-panel");
+const $byokClose = document.getElementById("byok-close");
+const $byokInput = document.getElementById("byok-input");
+const $byokSave  = document.getElementById("byok-save");
+
+function escapeHtml(s) {
+  return (s ?? "").toString()
+    .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+function scrollDown() {
+  requestAnimationFrame(() => { $scroll.scrollTop = $scroll.scrollHeight; });
+}
+
+// ============================================================
+// BYOK (Bring Your Own Key)  ·  sessionStorage-only persistence
+// ============================================================
+function getByok() {
+  try { return sessionStorage.getItem(BYOK_KEY_NAME) || ""; }
+  catch (e) { return ""; }
+}
+function setByok(key) {
+  try {
+    if (key) sessionStorage.setItem(BYOK_KEY_NAME, key);
+    else     sessionStorage.removeItem(BYOK_KEY_NAME);
+  } catch (e) {}
+  refreshByokUI();
+}
+function refreshByokUI() {
+  const k = getByok();
+  $keyBtn.classList.toggle("active", !!k);
+  $keyBtn.title = k
+    ? "Custom Gemini key active. Click to manage."
+    : "Use your own Gemini API key";
+  // When opened: prefill input with masked value if a key is set
+  if (!$byokPanel.hidden && k && !$byokInput.value) {
+    $byokInput.value = k;
+  }
+  // Toggle Save button into a "Clear" affordance when a key is set
+  if (k) {
+    $byokSave.textContent = "Clear key";
+    $byokSave.classList.add("danger");
+  } else {
+    $byokSave.textContent = "Save";
+    $byokSave.classList.remove("danger");
+  }
+}
+function openByokPanel() {
+  $byokPanel.hidden = false;
+  refreshByokUI();
+  if (!$byokInput.value) $byokInput.focus();
+}
+function closeByokPanel() {
+  $byokPanel.hidden = true;
+  $byokInput.classList.remove("invalid");
+}
+$keyBtn.addEventListener("click", () => {
+  $byokPanel.hidden ? openByokPanel() : closeByokPanel();
+});
+$byokClose.addEventListener("click", closeByokPanel);
+$byokSave.addEventListener("click", () => {
+  if (getByok()) {
+    // Clear path
+    setByok("");
+    $byokInput.value = "";
+    closeByokPanel();
+    return;
+  }
+  const v = ($byokInput.value || "").trim();
+  if (!BYOK_FORMAT_RE.test(v)) {
+    $byokInput.classList.add("invalid");
+    $byokInput.focus();
+    return;
+  }
+  setByok(v);
+  closeByokPanel();
+});
+$byokInput.addEventListener("input", () => {
+  $byokInput.classList.remove("invalid");
+});
+refreshByokUI();
+
+// Inline link in the welcome state also opens the BYOK panel
+document.addEventListener("click", (e) => {
+  if (e.target && e.target.id === "open-byok-link") {
+    e.preventDefault();
+    openByokPanel();
+  }
+});
+
+// ============================================================
+// Composer
+// ============================================================
+function autoresize() {
+  $input.style.height = "auto";
+  $input.style.height = Math.min($input.scrollHeight, 160) + "px";
+}
+$input.addEventListener("input", autoresize);
+$input.addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();
+    if (!$send.disabled) sendMessage();
+  }
+});
+$send.addEventListener("click", () => { if (!$send.disabled) sendMessage(); });
+
+// ============================================================
+// Render examples + Feeling Lucky
+// ============================================================
+function renderExamples() {
+  const picks = [...EXAMPLES].sort(() => Math.random() - 0.5).slice(0, 4);
+  $examples.innerHTML = picks.map(e => `
+    <div class="example" data-text="${escapeHtml(e.text)}">
+      <span class="tag">${escapeHtml(e.tag)}</span>
+      ${escapeHtml(e.text)}
+    </div>
+  `).join("");
+  $examples.querySelectorAll(".example").forEach(el => {
+    el.addEventListener("click", () => {
+      $input.value = el.dataset.text;
+      autoresize();
+      $input.focus();
+    });
+  });
+}
+$lucky.addEventListener("click", () => {
+  const pick = EXAMPLES[Math.floor(Math.random() * EXAMPLES.length)];
+  $input.value = pick.text;
+  autoresize();
+  if (!$send.disabled) sendMessage();
+});
+
+// ============================================================
+// Load tool catalog (just for chip names)
+// ============================================================
+async function loadTools() {
+  try {
+    const r = await fetch(API_BASE + "/api/tools");
+    const d = await r.json();
+    if (Array.isArray(d.tools) && d.tools.length) {
+      TOOL_NAMES = d.tools.map(t => t.name);
+    }
+  } catch (e) { /* keep defaults */ }
+}
+loadTools();
+
+// ============================================================
+// Math rendering helper.
+//
+// KaTeX is loaded via defer, so it may not be ready when the first chat
+// response arrives. We retry briefly, and also re-typeset everything on
+// window.load as a final fallback.
+// ============================================================
+const KATEX_OPTS = {
+  delimiters: [
+    { left: "$$", right: "$$", display: true  },
+    { left: "$",  right: "$",  display: false },
+    { left: "\\(", right: "\\)", display: false },
+    { left: "\\[", right: "\\]", display: true  },
+  ],
+  throwOnError: false,
+  errorColor: "#3c3c43",
+  ignoredTags: ["script", "noscript", "style", "textarea", "pre"],
+};
+
+function typesetMath(el, retries = 8) {
+  if (!el) return;
+  if (window.renderMathInElement) {
+    try { window.renderMathInElement(el, KATEX_OPTS); } catch (e) {}
+    return;
+  }
+  if (retries > 0) {
+    setTimeout(() => typesetMath(el, retries - 1), 100);
+  }
+}
+
+// Fallback: when the whole page is done loading, sweep every existing bubble.
+window.addEventListener("load", () => {
+  document.querySelectorAll(".msg.agent .bubble").forEach(b => typesetMath(b));
+});
+
+// ============================================================
+// Response formatter.
+//
+// Ordering matters: parse Markdown link syntax [text](url) FIRST so we
+// don't double-link DOIs already inside the brackets, then handle code,
+// bold, list bullets, italics, and finally any remaining bare DOIs that
+// aren't sitting inside an anchor (negative lookbehind on " / >).
+// ============================================================
+function formatResponse(text) {
+  let t = (text || "").trim();
+  let out = escapeHtml(t);
+
+  // 1. Markdown links [text](url|doi).  DOI targets get a `.doi-link`
+  //    class + tooltip so they read as external paper links.
+  out = out.replace(
+    /\[([^\]\n]+)\]\((https?:\/\/[^)\s]+|10\.\d{4,9}\/[^)\s]+)\)/g,
+    (_m, label, url) => {
+      const isDoi = url.startsWith("10.") || /(?:dx\.)?doi\.org\//.test(url);
+      const href  = url.startsWith("10.") ? `https://doi.org/${url}` : url;
+      const cls   = isDoi ? ' class="doi-link"' : "";
+      const ttl   = isDoi ? ` title="Open paper in a new tab - ${href}"` : "";
+      return `<a href="${href}" target="_blank" rel="noopener"${cls}${ttl}>${label}</a>`;
+    }
+  );
+
+  // 2. Inline code
+  out = out.replace(/`([^`]+)`/g, "<code>$1</code>");
+
+  // 3. **bold**
+  out = out.replace(/\*\*([^*\n]+)\*\*/g, "<strong>$1</strong>");
+
+  // 4. Markdown headers (# ... ###### ...) at line start  ->  styled h4.
+  //    The agent uses these to label sub-sections like "### Top 3 Commercial".
+  out = out.replace(/^(#{1,6})\s+(.+)$/gm, "<h4 class=\"resp-h\">$2</h4>");
+
+  // 5. Ordered lists: lines beginning with "1.", "2.", ... grouped into <ol>.
+  out = out.replace(
+    /(?:^|\n)((?:\d+\.\s+[^\n]+(?:\n\d+\.\s+[^\n]+)*))/g,
+    (_match, block) => {
+      const items = block.split(/\n(?=\d+\.\s)/).map(it =>
+        `<li>${it.replace(/^\d+\.\s+/, "").trim()}</li>`
+      ).join("");
+      return `\n<ol>${items}</ol>`;
+    }
+  );
+
+  // 6. Unordered lists: lines beginning with "* " or "- " grouped into <ul>.
+  //    Must run BEFORE the italic step so we don't mistake "* item" for italics.
+  out = out.replace(
+    /(?:^|\n)((?:[*\-]\s+[^\n]+(?:\n[*\-]\s+[^\n]+)*))/g,
+    (_match, block) => {
+      const items = block.split(/\n(?=[*\-]\s)/).map(it =>
+        `<li>${it.replace(/^[*\-]\s+/, "").trim()}</li>`
+      ).join("");
+      return `\n<ul>${items}</ul>`;
+    }
+  );
+
+  // 7. *italic* (single asterisks; bullets and lists already consumed).
+  out = out.replace(/\*(?!\s)([^*\n]+?)(?<!\s)\*/g, "<em>$1</em>");
+
+  // 8 + 9. Linkify bare DOIs *only outside existing anchors*.  Two
+  //         passes (URL form, then bare-identifier form) - each runs
+  //         only on the segments *between* existing `<a>...</a>` tags,
+  //         and we re-split between passes because pass-1 introduces
+  //         new anchors whose href/title attributes contain a DOI
+  //         substring that pass-2 would otherwise re-wrap, breaking
+  //         the HTML.  We also tried a negative lookbehind earlier,
+  //         but `(?<![">\/])` blocks any DOI right after `<li>`,
+  //         `</p>`, etc., so list-bulleted Sources never became
+  //         clickable.
+  const _doiUrlRe  = /https?:\/\/(?:dx\.)?doi\.org\/[^\s"',;)\]\}<>*`~]+/g;
+  const _doiBareRe = /\b(10\.\d{4,9}\/[^\s"',;)\]\}<>*`~]+)/g;
+  const _anchorRe  = /(<a\s[^>]*>[\s\S]*?<\/a>)/gi;
+  function _linkifyOutsideAnchors(html, regex, wrap) {
+    return html.split(_anchorRe).map((seg, i) =>
+      (i % 2 === 1) ? seg : seg.replace(regex, wrap)
+    ).join("");
+  }
+  // Pass 1: bare https://doi.org/... URLs
+  out = _linkifyOutsideAnchors(out, _doiUrlRe,
+    (m) => `<a href="${m}" target="_blank" rel="noopener" class="doi-link" title="Open paper in a new tab - ${m}">${m}</a>`);
+  // Pass 2: bare 10.xxxx/yyyy identifiers (re-splits, so pass-1 anchors are safe)
+  out = _linkifyOutsideAnchors(out, _doiBareRe,
+    (m) => `<a href="https://doi.org/${m}" target="_blank" rel="noopener" class="doi-link" title="Open paper in a new tab - https://doi.org/${m}">${m}</a>`);
+
+  // 10. Paragraphs (blank lines). Block-level elements pass through unwrapped.
+  const paragraphs = out.split(/\n{2,}/).map(p => {
+    if (/^\s*<(?:ul|ol|h\d)>/.test(p)) return p;
+    return `<p>${p.replace(/\n/g, "<br>")}</p>`;
+  });
+  return paragraphs.join("");
+}
+
+// ============================================================
+// Render messages
+// ============================================================
+function ensureWelcomeHidden() {
+  if (!$welcome.classList.contains("hidden")) {
+    $welcome.classList.add("hidden");
+  }
+}
+
+function addUserMsg(text) {
+  ensureWelcomeHidden();
+  const wrap = document.createElement("div");
+  wrap.className = "msg user";
+  wrap.innerHTML = `<div class="bubble">${escapeHtml(text)}</div>`;
+  $thread.appendChild(wrap);
+  scrollDown();
+}
+
+/* Build a "thinking" bubble for one rung, with chips iff agentic. */
+function buildThinkingBubble(rung) {
+  const isAgentic = rung === "agentic";
+  const inner = isAgentic
+    ? TOOL_NAMES.map(n => `
+        <span class="chip idle" data-tool="${escapeHtml(n)}">${escapeHtml(n)}</span>`
+      ).join("")
+    : `<span class="no-tools-note">No tools · pure pretraining knowledge</span>`;
+  return `
+    <div class="bubble">
+      <div class="thinking-head">
+        <span>Thinking</span>
+        <span class="dots"><span></span><span></span><span></span></span>
+      </div>
+      <div class="chip-row">${inner}</div>
+    </div>
+  `;
+}
+
+function buildResponseBubble(snap, rung) {
+  const isAgentic = rung === "agentic";
+  const body = snap.error
+    ? `<p><strong style="color:#d70015">Error.</strong></p>
+       <p style="color:var(--ink-3);margin-bottom:0;">${escapeHtml(snap.error)}</p>`
+    : formatResponse(snap.response || "(no response)");
+  let traceHtml = "";
+  const calls = snap.tool_calls || [];
+  if (isAgentic && calls.length) {
+    const items = calls.map(c => {
+      const argsStr = c.args
+        ? Object.entries(c.args).map(([k, v]) =>
+            `${k}=${typeof v === "string" ? `"${v}"` : JSON.stringify(v)}`
+          ).join(", ")
+        : "";
+      return `<div class="call">
+        <span class="tname">${escapeHtml(c.tool || "?")}</span><span class="args">(${escapeHtml(argsStr)})</span>
+        <span class="arrow">→</span>
+        ${escapeHtml(c.result || "")}
+      </div>`;
+    }).join("");
+    traceHtml = `
+      <details class="trace">
+        <summary>Tool calls (${calls.length})</summary>
+        ${items}
+      </details>`;
+  }
+  return `<div class="bubble">${body}${traceHtml}</div>`;
+}
+
+/**
+ * Create one or two rung "slots" in the thread. In single mode, slot.host
+ * is the parent that will contain the thinking-bubble and later the response.
+ * In compare mode, we create two side-by-side columns each with its own slot.
+ *
+ * Returns: { wrap, slots: [{rung, host, inner, replaceWith(html)}] }
+ */
+function createAgentSlots(rungs) {
+  const wrap = document.createElement("div");
+
+  if (rungs.length === 1) {
+    wrap.className = "msg agent";
+    const host = document.createElement("div");
+    host.style.display = "contents";
+    wrap.appendChild(host);
+    host.innerHTML = buildThinkingBubble(rungs[0]);
+    $thread.appendChild(wrap);
+    return {
+      wrap,
+      slots: [{
+        rung: rungs[0],
+        host,
+        get inner() { return host.firstElementChild; },
+        replaceWith(html) { host.innerHTML = html; typesetMath(host); },
+      }],
+    };
+  }
+
+  // Compare mode: side-by-side
+  wrap.className = "msg agent compare";
+  const grid = document.createElement("div");
+  grid.className = "compare-grid";
+  wrap.appendChild(grid);
+  const slots = rungs.map(r => {
+    const col = document.createElement("div");
+    col.className = `compare-col ${r}`;
+    col.innerHTML = `
+      <span class="rung-tag ${r}">
+        <span class="dot"></span>
+        ${r === "vanilla" ? "Vanilla LLM" : "Agentic RAG"}
+      </span>
+      <div class="rung-host">${buildThinkingBubble(r)}</div>
+    `;
+    grid.appendChild(col);
+    const host = col.querySelector(".rung-host");
+    return {
+      rung: r,
+      host,
+      get inner() { return host.firstElementChild; },
+      replaceWith(html) { host.innerHTML = html; typesetMath(host); },
+    };
+  });
+  $thread.appendChild(wrap);
+  return { wrap, slots };
+}
+
+// ============================================================
+// Tool-glow controller (operates within a given host element)
+// ============================================================
+function setToolStateIn(host, name, state) {
+  const el = host.querySelector(`.chip[data-tool="${name}"]`);
+  if (!el) return;
+  el.classList.remove("idle", "active", "used");
+  el.classList.add(state);
+}
+function bumpToolCountIn(host, name) {
+  const el = host.querySelector(`.chip[data-tool="${name}"]`);
+  if (!el) return;
+  let c = parseInt(el.dataset.count || "0", 10) + 1;
+  el.dataset.count = c;
+  let badge = el.querySelector(".count");
+  if (!badge) {
+    badge = document.createElement("span");
+    badge.className = "count";
+    el.appendChild(badge);
+  }
+  badge.textContent = c > 1 ? `×${c}` : "";
+}
+
+// ============================================================
+// Per-slot polling loop
+// ============================================================
+async function runSlot(slot, query) {
+  // Start the job
+  let jobId;
+  try {
+    const userKey = getByok();
+    const r = await fetch(API_BASE + "/api/chat_start", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        message: query,
+        rung: slot.rung,
+        ...(userKey ? { api_key: userKey } : {}),
+      }),
+    });
+    const data = await r.json();
+    if (r.status === 429) {
+      // Soft message instead of red error bubble - rate limit is recoverable
+      slot.replaceWith(`
+        <div class="bubble">
+          <div class="soft-notice">
+            ${escapeHtml(data.message || "Rate limit reached. Please try again shortly.")}
+            ${data.limit ? `<br><span style="opacity:0.75;font-size:11.5px;">(limit: ${escapeHtml(data.limit)})</span>` : ""}
+          </div>
+        </div>`);
+      return;
+    }
+    if (!r.ok || !data.job_id) throw new Error(data.error || "start failed");
+    jobId = data.job_id;
+  } catch (e) {
+    slot.replaceWith(buildResponseBubble({ error: e.message || String(e) }, slot.rung));
+    return;
+  }
+
+  let lastSeen = 0, lastActiveTool = null;
+  const t0 = performance.now();
+  while (true) {
+    let snap;
+    try {
+      const r = await fetch(API_BASE + `/api/chat_status?job_id=${encodeURIComponent(jobId)}`);
+      snap = await r.json();
+      if (!r.ok) throw new Error(snap.error || "status failed");
+    } catch (e) {
+      slot.replaceWith(buildResponseBubble({ error: e.message || String(e) }, slot.rung));
+      return;
+    }
+
+    // Live tool-glow (only meaningful for agentic)
+    if (slot.rung === "agentic") {
+      const calls = snap.tool_calls || [];
+      if (calls.length > lastSeen) {
+        if (lastActiveTool) setToolStateIn(slot.host, lastActiveTool, "used");
+        for (let i = lastSeen; i < calls.length; i++) {
+          const t = calls[i].tool;
+          bumpToolCountIn(slot.host, t);
+          if (i === calls.length - 1) {
+            setToolStateIn(slot.host, t, "active");
+            lastActiveTool = t;
+          } else {
+            setToolStateIn(slot.host, t, "used");
+          }
+        }
+        lastSeen = calls.length;
+      }
+    }
+
+    if (snap.done) {
+      const elapsed = performance.now() - t0;
+      const minDisplay = 300;
+      await new Promise(r => setTimeout(r, Math.max(0, minDisplay - elapsed)));
+      slot.replaceWith(buildResponseBubble(snap, slot.rung));
+      scrollDown();
+      return;
+    }
+    await new Promise(r => setTimeout(r, POLL_MS));
+  }
+}
+
+// ============================================================
+// Send: orchestrate one or two slots depending on mode
+// ============================================================
+async function sendMessage() {
+  const text = $input.value.trim();
+  if (!text) return;
+  $input.value = "";
+  autoresize();
+  $send.disabled = true;
+  $input.disabled = true;
+
+  addUserMsg(text);
+
+  const { slots } = createAgentSlots(RUNGS_TO_SHOW);
+  scrollDown();
+
+  // Run all slots in parallel
+  await Promise.all(slots.map(s => runSlot(s, text)));
+
+  $send.disabled = false;
+  $input.disabled = false;
+  $input.focus();
+}
+
+// ============================================================
+// Boot
+// ============================================================
+renderExamples();
+$input.focus();
+</script>
+</body>
+</html>

@@ -1,0 +1,18 @@
+pfas,c_com,n_com,c_all,n_all,chem_class,chain_length,notes
+PFBS,1.24e3,2.44,,,PFSA,4,
+PFPeS,4.43e3,2.47,,,PFSA,5,
+PFHxS,1.11e6,3.75,8.38e6,3.75,PFSA,6,
+PFHpS,9.83e4,3.09,,,PFSA,7,
+PFOS,3.18e8,5.00,4.53e9,5.00,PFSA,8,UNCERTAIN: c_all may be 4.53e3 (per screenshot read) but physically should be larger than c_com; assumed 4.53e9. Please verify.
+PFMOPrA,44.9,1.26,,,Other,3,
+PFMOBA,150.51,1.46,,,Other,4,
+4:2FTS,5.89e3,2.52,,,Other,4,
+GenX,2.73e4,2.71,,,Other,3,
+6:2FTS,1.16e6,3.11,,,Other,6,
+PFBA,1.42e3,2.13,,,PFCA,4,
+PFPeA,7.79e3,2.97,,,PFCA,5,
+PFHxA,7.33e5,3.61,7.89e6,3.61,PFCA,6,
+PFHpA,3.58e5,3.56,4.90e6,3.56,PFCA,7,
+PFOA,4.09e5,3.47,4.90e6,3.47,PFCA,8,
+PFNA,3.95e5,3.42,9.84e6,3.42,PFCA,9,
+PFDA,1.03e8,4.67,,,PFCA,10,

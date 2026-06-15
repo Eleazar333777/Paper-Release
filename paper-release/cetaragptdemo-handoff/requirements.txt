@@ -1,0 +1,22 @@
+# Core LangChain stack (1.0 LTS, semver-stable)
+langchain>=1.0,<2.0
+langchain-core>=1.0,<2.0
+langchain-google-genai>=2.0
+langgraph>=1.0,<2.0
+langsmith>=0.3.0
+
+# Data & numerical
+pandas>=2.0
+numpy>=1.24
+openpyxl>=3.1
+scipy>=1.11
+
+# Notebooks & visualization
+jupyter>=1.0
+ipykernel>=6.0
+matplotlib>=3.7
+seaborn>=0.13
+
+# Utilities
+typing-extensions>=4.5
+tqdm>=4.65
