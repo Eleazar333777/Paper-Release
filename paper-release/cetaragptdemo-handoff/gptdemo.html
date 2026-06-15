@@ -832,7 +832,7 @@ textarea::placeholder {
 // ============================================================
 // Constants
 // ============================================================
-const API_BASE = "https://cetara.jinyue-jiang.com";   // gptdemo.html (data-here.com) calls the Oracle backend cross-origin
+const API_BASE = window.location.origin;   // gptdemo.html (data-here.com) calls the Oracle backend cross-origin
     const POLL_MS = 220;
 const RUNGS_TO_SHOW = ["vanilla", "agentic"];   // always render both side-by-side
 const BYOK_KEY_NAME = "cetara-byok";            // sessionStorage entry name
