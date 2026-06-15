@@ -1,9 +1,9 @@
 """CetaraGPT chatbot demo - Flask server.
 
-Serves demo.html and exposes the agentic-RAG rung via a small async-ish API
+Serves gptdemo.html and exposes the agentic-RAG rung via a small async-ish API
 so the front-end can show tool calls glowing in real time:
 
-    GET  /                       -> demo.html
+    GET  /                       -> gptdemo.html
     GET  /api/tools              -> static catalog of the 5 agentic tools
     POST /api/chat_start         -> kicks off a job, returns {job_id}
     GET  /api/chat_status?job_id -> live snapshot: {tool_calls, done, response, ...}
@@ -337,7 +337,7 @@ def _run_agent_job(job_id: str, query: str, rung: str,
 
 # Flask app
 # Note: static_url_path="" would catch /api/* and shadow our POST routes,
-# so we disable Flask's static handler and explicitly route demo.html below.
+# so we disable Flask's static handler and explicitly route gptdemo.html below.
 app = Flask(__name__, static_folder=None)
 
 # Per-IP rate limiting.
@@ -426,7 +426,7 @@ def _cors_after(resp):
 
 @app.route("/")
 def index():
-    return send_from_directory(".", "demo.html")
+    return send_from_directory(".", "gptdemo.html")
 
 @app.route("/api/tools")
 @limiter.exempt
