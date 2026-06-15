@@ -741,7 +741,7 @@ ECI (Stuffed Context) and Structured RAG are fully implemented in the backend bu
 
 ### Option A — Direct Python Invocation (No Frontend Changes Required)
 
-This is the simplest method for a reviewer who wants to test all four configurations without modifying any HTML.
+This is the simplest method for a reviewer who wants to verify all four configurations described in the manuscript without modifying the frontend.
 
 With the virtual environment active and from the `cetaragptdemo-handoff/` directory, run:
 
@@ -755,18 +755,62 @@ QUERY = 'What is the removal rate of PFOS by NF90?'
 DB = 'pfas_membrane.db'
 MODEL = 'gemini-3.1-flash-lite'
 
-print('=== ECI (Stuffed Context) ===')
-r = rungs.run_stuffed(QUERY, model_name=MODEL, api_key=KEY, db_path=DB)
+print('=== Vanilla LLM ===')
+r = rungs.run_vanilla(
+    QUERY,
+    model_name=MODEL,
+    api_key=KEY
+)
 print(r.response_text)
+print('ERROR:', r.error)
+
+print()
+print('=== ECI (Stuffed Context) ===')
+r = rungs.run_stuffed(
+    QUERY,
+    model_name=MODEL,
+    api_key=KEY,
+    db_path=DB
+)
+print(r.response_text)
+print('ERROR:', r.error)
 
 print()
 print('=== Structured RAG (Text-to-SQL) ===')
-r = rungs.run_text_to_sql(QUERY, model_name=MODEL, api_key=KEY, db_path=DB)
+r = rungs.run_text_to_sql(
+    QUERY,
+    model_name=MODEL,
+    api_key=KEY,
+    db_path=DB
+)
 print(r.response_text)
+print('SQL:', r.sql_generated)
+print('ERROR:', r.error)
+
+print()
+print('=== Agentic RAG ===')
+r = rungs.run_agentic_demo(
+    QUERY,
+    model_name=MODEL,
+    api_key=KEY,
+    db_path=DB
+)
+print(r.response_text)
+print('ERROR:', r.error)
 "
 ```
 
-This will run both configurations against the same query and print the responses to the terminal.
+Successful execution should:
+
+1. Produce four separate responses.
+2. Show progressively more dataset-grounded behavior as retrieval sophistication increases.
+3. End each section with:
+
+```text
+ERROR: None
+```
+
+This verifies that all four experimental configurations described in the manuscript are present and operational in the released artifact.
 
 ### Option B — Extend the Backend Routing
 
