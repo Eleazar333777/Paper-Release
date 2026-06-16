@@ -713,7 +713,7 @@ The configurations are:
 
 No retrieval. No database access. The model answers using only its pretraining knowledge. This establishes the baseline for evaluating what the model "already knows" about PFAS membranes without grounding.
 
-### Configuration 2 — ECI (Explicit Context Injection / Stuffed Context)
+### Configuration 2 — ECI (Exhaustive Context Injection / Stuffed Context)
 
 **Backend function:** `run_stuffed()`
 
